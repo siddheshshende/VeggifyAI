@@ -1,0 +1,19 @@
+# Ignore environment variables
+.env
+
+# Ignore Firebase configuration (if it contains sensitive data)
+firebase.js
+
+# Ignore node_modules directory
+node_modules/
+
+# Ignore other common files and directories
+.DS_Store
+dist/
+build/
+*.log
+*.tmp
+*.temp
+.cache
+.idea/
+.vscode/
