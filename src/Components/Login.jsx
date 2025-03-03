@@ -63,11 +63,12 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center ml-[18vh]">
-      <div className="bg-white p-8 rounded-lg shadow-lg w-96">
+    <div className="min-h-screen   flex items-center justify-center ml-[18vh]">
+      <div className="bg-neutral-100  p-8 rounded-lg shadow-lg w-96">
         {!user ? (
           <>
-            <h2 className="text-2xl font-semibold mb-16 text-center text-black">
+          <h1 className="text-2xl mb-8 text-center text-green-600 font-extrabold">  <u> Veggify</u></h1>
+            <h2 className="text-2xl font-semibold mb-5 text-center text-black">
               {isSignIn ? "Sign In" : "Sign Up"}
             </h2>
             <button

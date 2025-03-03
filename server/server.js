@@ -105,7 +105,7 @@ ${userPreferences.ChronicDiseases ? `- **Chronic Diseases**: ${userPreferences.C
 
 ### ** Additional Guidelines:**
 1. **Provide a culturally authentic recipe name (in the local language).**  
-2. **List all preparation & cooking steps in a numbered format.**  
+2. **List all preparation & cooking steps in a unordered list format.**  
 3. **Ensure the dish is balanced, safe, and beneficial for health conditions/allergies.**  
 4. **Explain how the selected ingredients benefit the given health conditions.**  
 5. **Format the response in Markdown for clarity.**  
@@ -147,7 +147,7 @@ ${userPreferences.ChronicDiseases ? `- **Chronic Diseases**: ${userPreferences.C
       res.write(`data: ${JSON.stringify(marked(accumulatedContent.trim()))}\n\n`);
     }
 
-    res.write('data: [And it’s done]\n\n');
+    res.write('data: [And its done]\n\n');
     console.log(" Recipe generation complete");
 
   } catch (error) {

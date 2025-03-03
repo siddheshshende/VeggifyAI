@@ -24,13 +24,21 @@ if (!/Cooking Steps:/.test(updatedText) && !/Instructions:/.test(updatedText)) {
 }
 
   // Clean and format text
-  const formattedText = text
-  .replace(/["']{1,}/g, "") 
-    .replace(/\n/g, "\n\n") // Ensure Markdown line breaks work properly
-    .replace(/(Ingredients:|Preparation:|Cooking Steps:|Instructions:)/g, "<hr /><strong>$1</strong>")
-    .replace(/-\s*/g, "\n- ") // Ensure each ingredient starts on a new line
-    .replace(/(\d+)\.\s*/g, "\n$1. "); // Ensure numbering starts on a new line
+  const formattedText = updatedText
+  .replace(/["']{1,}/g, "") // Remove excessive quotes
+  .replace(/\n{3,}/g, "\n\n") // Limit consecutive newlines to two
+  .replace(/(Ingredients:|Preparation:|Cooking Steps:|Instructions:|Preparation Steps:|Health Benefits:)/g, "\n> $1\n") // Add Markdown headers
+  .replace(/-\s*/g, "\n- ") // Ensure each ingredient starts on a new line
+  .replace(/(\\n)+/g, '\n') // Normalize newlines
+  .replace(/(?<=\S)\n(?=\S)/g, '  \n') // Markdown-friendly line breaks
+  .trim(); // Remove leading/trailing whitespace
 
+  const finalText = formattedText
+  .replace(/<ol[^>]*>/g, "<ul>")
+  .replace(/<\/ol>/g, "</ul>");
+  
+  console.log("Text:", updatedText);
+  console.log("Formatted Text:", formattedText);
   return (
     <div className="p-6 bg-white shadow-lg rounded-lg text-gray-900">
       <h2 className="text-2xl font-bold mb-4 text-blue-600">Your Recipe</h2>
