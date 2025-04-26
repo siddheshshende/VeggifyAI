@@ -1,10 +1,11 @@
-import express from 'express'; 
-import cors from 'cors';
-import { marked } from 'marked';
-import dotenv from 'dotenv';
-import OpenAI from 'openai';
-import { doc, getDoc } from 'firebase/firestore';
+import express from "express";
+import cors from "cors";
+import { marked } from "marked";
+import dotenv from "dotenv";
+import OpenAI from "openai";
+import { doc, getDoc } from "firebase/firestore";
 import { db } from "../src/config/firebase.js";
+import { collection, addDoc } from "firebase/firestore";
 
 dotenv.config();
 
@@ -14,21 +15,20 @@ const PORT = process.env.PORT || 3001;
 app.use(cors());
 
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
+  apiKey: process.env.OPENAI_API_KEY,
 });
 
 // Function to validate OpenAI API key
 async function validateOpenAI() {
   try {
     await openai.models.list();
-    console.log(' OpenAI API key is valid');
+    console.log(" OpenAI API key is valid");
     return true;
   } catch (error) {
-    console.error(' OpenAI API key validation failed:', error.message);
+    console.error(" OpenAI API key validation failed:", error.message);
     return false;
   }
 }
-
 
 async function fetchDocument(userId) {
   if (!userId) throw new Error("UserId is required");
@@ -49,35 +49,61 @@ async function fetchDocument(userId) {
   }
 }
 
+// Function to save the generated recipe to Firebase
+const saveRecipeToFirebase = async (userId, recipeContent) => {
+  try {
+    const docRef = await addDoc(collection(db, "Recipes"), {
+      userId,
+      content: recipeContent,
+      createdAt: new Date(),
+    });
+    console.log("Recipe saved with ID:", docRef.id);
+    return docRef.id; // ✅ Return recipe ID for bookmarking
+  } catch (error) {
+    console.error("Error saving recipe:", error);
+    return null;
+  }
+};
+
 //  Recipe generation endpoint (Streaming)
-app.get('/recipestream', async (req, res) => {
+app.get("/recipestream", async (req, res) => {
   console.log(" Received request to /recipestream");
 
-  res.setHeader('Content-Type', 'text/event-stream');
-  res.setHeader('Cache-Control', 'no-cache');
-  res.setHeader('Connection', 'keep-alive');
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
   res.flushHeaders();
 
   // Get query parameters
-  const { ingredients, mealType, cuisine, cookingTime, complexity, userId } = req.query;
+  const { ingredients, mealType, cuisine, cookingTime, complexity, userId } =
+    req.query;
 
-  
   if (!ingredients || !mealType || !cuisine || !cookingTime || !complexity) {
-    console.error(" Missing required parameters", { ingredients, mealType, cuisine, cookingTime, complexity });
+    console.error(" Missing required parameters", {
+      ingredients,
+      mealType,
+      cuisine,
+      cookingTime,
+      complexity,
+    });
     res.status(400).send(" Missing required query parameters");
     return;
   }
-  console.log(" Parameters validated:", { ingredients, mealType, cuisine, cookingTime, complexity });
+  console.log(" Parameters validated:", {
+    ingredients,
+    mealType,
+    cuisine,
+    cookingTime,
+    complexity,
+  });
 
   try {
-
     const isValidAPI = await validateOpenAI();
     if (!isValidAPI) {
       res.status(500).send(" Invalid OpenAI API configuration");
       return;
     }
 
-    
     let userPreferences = {};
     try {
       if (userId) {
@@ -87,7 +113,6 @@ app.get('/recipestream', async (req, res) => {
       console.error(" Error fetching user preferences:", error);
     }
 
-   
     const promptContent = `
      You are a professional chef and nutrition expert. Your goal is to generate a detailed, easy-to-follow recipe that:  
 - Uses **only the provided ingredients**.  
@@ -100,11 +125,19 @@ app.get('/recipestream', async (req, res) => {
 - **Cuisine**: ${cuisine}  
 - **Cooking Time**: ${cookingTime}  
 - **Complexity**: ${complexity}  
-${userPreferences.Allergies ? `- **Allergies**: ${userPreferences.Allergies.join(', ')}` : ''}  
-${userPreferences.ChronicDiseases ? `- **Chronic Diseases**: ${userPreferences.ChronicDiseases.join(', ')}` : ''}  
+${
+  userPreferences.Allergies
+    ? `- **Allergies**: ${userPreferences.Allergies.join(", ")}`
+    : ""
+}  
+${
+  userPreferences.ChronicDiseases
+    ? `- **Chronic Diseases**: ${userPreferences.ChronicDiseases.join(", ")}`
+    : ""
+}  
 
 ### ** Additional Guidelines:**
-1. **Provide a culturally authentic recipe name (in the local language).**  
+1. **Provide a culturally authentic recipe name.**  
 2. **List all preparation & cooking steps in a unordered list format.**  
 3. **Ensure the dish is balanced, safe, and beneficial for health conditions/allergies.**  
 4. **Explain how the selected ingredients benefit the given health conditions.**  
@@ -130,13 +163,15 @@ ${userPreferences.ChronicDiseases ? `- **Chronic Diseases**: ${userPreferences.C
 
     //  Process OpenAI Streaming Response
     for await (const chunk of completion) {
-      const content = chunk.choices[0]?.delta?.content || '';
+      const content = chunk.choices[0]?.delta?.content || "";
       if (content) {
         accumulatedContent += content;
-    
+
         // Ensure full sentences before sending
         if (/[.!?]\s*$/.test(content) || content.includes("\n")) {
-          res.write(`data: ${JSON.stringify(marked(accumulatedContent.trim()))}\n\n`);
+          res.write(
+            `data: ${JSON.stringify(marked(accumulatedContent.trim()))}\n\n`
+          );
           accumulatedContent = "";
         }
       }
@@ -144,12 +179,20 @@ ${userPreferences.ChronicDiseases ? `- **Chronic Diseases**: ${userPreferences.C
 
     // 🔄 Send any remaining content
     if (accumulatedContent) {
-      res.write(`data: ${JSON.stringify(marked(accumulatedContent.trim()))}\n\n`);
+      const recipeId = await saveRecipeToFirebase(
+        userId,
+        accumulatedContent.trim()
+      );
+      res.write(
+        `data: ${JSON.stringify({
+          recipeId,
+          content: marked(accumulatedContent.trim()),
+        })}\n\n`
+      );
     }
 
-    res.write('data: [And its done]\n\n');
+    res.write("data: [And its done]\n\n");
     console.log(" Recipe generation complete");
-
   } catch (error) {
     console.error(" Error in recipe generation:", error);
     res.write(`data: ${JSON.stringify({ error: error.message })}\n\n`);
@@ -159,18 +202,31 @@ ${userPreferences.ChronicDiseases ? `- **Chronic Diseases**: ${userPreferences.C
   }
 });
 
+app.get("/api/recipes/:id", async (req, res) => {
+  try {
+    const recipeRef = doc(db, "Recipes", req.params.id);
+    const recipeDoc = await getDoc(recipeRef);
+
+    if (!recipeDoc.exists()) {
+      return res.status(404).json({ message: "Recipe not found" });
+    }
+
+    res.json({ content: recipeDoc.data().content });
+  } catch (error) {
+    console.error("Error fetching recipe:", error);
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+});
 
 app.get("/health", (req, res) => {
   console.log(" Health check endpoint hit");
   res.json({ status: "healthy", timestamp: new Date().toISOString() });
 });
 
-
 app.listen(PORT, async () => {
   console.log(`🚀 Server running on port ${PORT}`);
   await validateOpenAI();
 });
-
 
 /*import express from 'express'; 
 import cors from 'cors';

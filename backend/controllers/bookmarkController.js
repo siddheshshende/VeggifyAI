@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const app = express();
-const PORT = process.env.PORT || 3001;
+const { collection, addDoc, getDoc, doc, deleteDoc, query, where, getDocs } = require('firebase/firestore');
+const { db } = require('../config/firebase'); 
 
 // Middleware to authenticate requests
 const authenticate = (req, res, next) => {
@@ -11,50 +11,53 @@ const authenticate = (req, res, next) => {
   next();
 };
 
-// Bookmarks route
+// 📌 Route to GET all bookmarked recipes for a user
 router.get('/api/bookmarks', authenticate, async (req, res) => {
   try {
-    const bookmarks = await Bookmark.find({ userId: req.user.id }).execPopulate();
+    const bookmarksRef = collection(db, "Bookmarks");
+    const q = query(bookmarksRef, where("userId", "==", req.user.id));
+    const querySnapshot = await getDocs(q);
+
+    const bookmarks = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      recipeId: doc.data().recipeId
+    }));
+
     res.json(bookmarks);
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-// Add bookmark route
+// 📌 Route to ADD a bookmark (save recipeId)
 router.post('/api/bookmarks', authenticate, async (req, res) => {
   try {
-    const newBookmark = new Bookmark({
-      title: req.body.title,
-      url: req.body.url,
-      category: req.body.category,
-      userId: req.user.id,
+    const { recipeId } = req.body;
+
+    if (!recipeId) {
+      return res.status(400).json({ message: 'Missing recipe ID' });
+    }
+
+    const newBookmark = await addDoc(collection(db, "Bookmarks"), {
+      recipeId,
+      userId: req.user.id
     });
-    const savedBookmark = await newBookmark.save();
-    res.json(savedBookmark);
+
+    res.json({ id: newBookmark.id, recipeId });
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-// Delete bookmark route
+// 📌 Route to DELETE a bookmark
 router.delete('/api/bookmarks/:id', authenticate, async (req, res) => {
   try {
-    const bookmark = await Bookmark.findById(req.params.id).execPopulate();
-    if (bookmark) {
-      await bookmark.destroy();
-      res.json({ message: 'Bookmark deleted successfully' });
-    } else {
-      res.status(404).json({ message: 'Bookmark not found' });
-    }
+    const bookmarkRef = doc(db, "Bookmarks", req.params.id);
+    await deleteDoc(bookmarkRef);
+    res.json({ message: 'Bookmark deleted successfully' });
   } catch (error) {
     res.status(500).json({ message: 'Internal Server Error' });
   }
 });
 
-app.use(express.json());
-app.use(router);
-
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+module.exports = router;

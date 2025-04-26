@@ -212,6 +212,7 @@ const RecipeCard = ({ onSubmit, userId }) => {
     console.log("Recipe data submitted: ", recipeData);
   };
 
+
   return (
     <div className="w-[400px] h-[565px] border rounded-lg overflow-hidden shadow-lg">
       <div className="px-6 py-4">
@@ -291,7 +292,10 @@ const RecipeCard = ({ onSubmit, userId }) => {
           </button>
         </div>
       </div>
+  
+
     </div>
+    
   );
 };
 
@@ -358,16 +362,36 @@ function Recipes() {
     return () => unsubscribe();
   }, []);
 
+  
+  const addBookmark = async () => {
+    if (!generatedRecipeId) {  // Ensure recipeId exists
+      console.error("No recipe ID found for bookmarking");
+      return;
+    }
+  
+    try {
+      await axios.post('/api/bookmarks', { recipeId: generatedRecipeId, userId });
+      alert("Recipe bookmarked successfully!");
+    } catch (error) {
+      console.error("Error bookmarking recipe:", error);
+    }
+  };
+  
   return (
-    <div className="App">
-      <div className="flex flex-row my-4 gap-2 justify-center pt-[10vh]">
+    <div className="App-RecipeContainer">
+      <div className="flex flex-row gap-2 justify-center ">
         <RecipeCard onSubmit={onSubmit} userId={userId} />
         <div className="w-[400px] h-[565px] text-xs text-gray-600 p-4 border rounded-lg shadow-xl overflow-y-auto">
           <RecipeDisplay text={recipeText} />  
         </div>
       </div>
+      <div>
+  </div>
     </div>
   );
 }
 
 export default Recipes;
+//<button 
+// className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline text-center mb-2"
+//onClick={addBookmark}>Bookmark Recipe</button>
