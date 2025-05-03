@@ -1,59 +1,141 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { signOut } from "firebase/auth";
-import { auth } from "../config/firebase";
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { toast } from 'react-toastify';
+import { 
+  User, 
+  Target, 
+  Utensils, 
+  Bookmark, 
+  ShoppingCart, 
+  LogOut,
+  ChevronLeft,
+  ChevronRight
+} from "lucide-react";
 
-function Sidebar() {
+function Sidebar({ logOut, collapsed, setCollapsed }) {
   const navigate = useNavigate();
 
-  const logOut = async () => {
-    try {
-      await signOut(auth);
-      toast.success("Logged out successfully!");
-      navigate("/");
-    } catch (err) {
-      console.error("Logout failed:", err);
-      toast.error("Failed to log out. Please try again.");
-    }
+  const handleLogout = () => {
+    logOut();
+    toast.success("Logged out successfully!");
+    navigate("/");
   };
 
+  const navItems = [
+    { label: "Profile", icon: <User size={20} />, route: "/profile" },
+    { label: "Goals Tracking", icon: <Target size={20} />, route: "/goaltracking" },
+    { label: "Recipes", icon: <Utensils size={20} />, route: "/recipes" },
+    { label: "Bookmarks", icon: <Bookmark size={20} />, route: "/bookmarks" },
+    { label: "Shopping List", icon: <ShoppingCart size={20} />, route: "/shoppinglist" },
+    { label: "Logout", icon: <LogOut size={20} />, onClick: handleLogout },
+  ];
+
   return (
-    <div className="h-screen bg-[#2E8B57]">
-      {/* "Veggify" logo with underline on hover and click to navigate */}
-      <div 
-        onClick={() => navigate("/home")} 
-        className="font-semibold text-5xl p-5 text-white cursor-pointer hover:underline"
+    <div className={`h-screen bg-[#2E8B57] relative transition-all duration-300 ${
+      collapsed ? "w-20" : "w-64"
+    }`}>
+      {/* Collapse toggle button */}
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="absolute -right-3 top-20 bg-[#2E8B57] p-1 rounded-full text-white shadow-md hover:bg-[#1e6b47] transition"
       >
-        Veggify
-      </div>
-      <div className="text-sm font-medium text-white px-5 py-1 ">
-        Your Personal Health Companion
+        {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+      </button>
+
+      {/* Logo */}
+      <div
+        onClick={() => navigate("/profile")}
+        className={`font-semibold ${collapsed ? "text-center text-3xl" : "text-5xl"} p-5 text-white cursor-pointer hover:underline truncate`}
+      >
+        {collapsed ? "V" : "Veggify"}
       </div>
 
-      <div className="pt-[30vh] grid-col-1 pl-8 text-white text-xl font-medium">
-        <div onClick={() => navigate("/profile")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
-          Profile
+      {/* Tagline */}
+      {!collapsed && (
+        <div className="text-sm font-medium text-white px-5 py-1">
+          Your Personal Health Companion
         </div>
-        <div onClick={() => navigate("/goaltracking")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
-          Goals Tracking
-        </div>
-        <div onClick={() => navigate("/recipes")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
-          Recipes
-        </div>
-        <div onClick={() => navigate("/bookmarks")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
-          Bookmarks
-        </div>
-        <div onClick={() => navigate("/shoppinglist")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
-          Shopping List
-        </div>
-        <div onClick={logOut} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
-          Logout
-        </div>
+      )}
+
+      {/* Navigation Items */}
+      <div className="pt-[15vh] flex flex-col text-white text-xl font-medium">
+        {navItems.map((item, index) => (
+          <div
+            key={index}
+            onClick={item.onClick || (() => navigate(item.route))}
+            className={`py-3 ${
+              collapsed ? "justify-center px-0" : "px-4 justify-start"
+            } flex items-center gap-3 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300`}
+          >
+            <div className={collapsed ? "mx-auto" : "ml-4"}>
+              {item.icon}
+            </div>
+            {!collapsed && <span>{item.label}</span>}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
 
 export default Sidebar;
+
+// import React from "react";
+// import { useNavigate } from "react-router-dom";
+// import { signOut } from "firebase/auth";
+// import { auth } from "../config/firebase";
+// import { ToastContainer, toast } from 'react-toastify';
+// import 'react-toastify/dist/ReactToastify.css';
+
+// function Sidebar() {
+//   const navigate = useNavigate();
+
+//   const logOut = async () => {
+//     try {
+//       await signOut(auth);
+//       toast.success("Logged out successfully!");
+//       navigate("/");
+//     } catch (err) {
+//       console.error("Logout failed:", err);
+//       toast.error("Failed to log out. Please try again.");
+//     }
+//   };
+
+//   return (
+//     <div className="h-screen bg-[#2E8B57]">
+//       {/* "Veggify" logo with underline on hover and click to navigate */}
+//       <div 
+//         onClick={() => navigate("/home")} 
+//         className="font-semibold text-5xl p-5 text-white cursor-pointer hover:underline"
+//       >
+//         Veggify
+//       </div>
+//       <div className="text-sm font-medium text-white px-5 py-1 ">
+//         Your Personal Health Companion
+//       </div>
+
+//       <div className="pt-[30vh] grid-col-1 pl-8 text-white text-xl font-medium">
+//         <div onClick={() => navigate("/profile")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
+//           Profile
+//         </div>
+//         <div onClick={() => navigate("/goaltracking")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
+//           Goals Tracking
+//         </div>
+//         <div onClick={() => navigate("/recipes")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
+//           Recipes
+//         </div>
+//         <div onClick={() => navigate("/bookmarks")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
+//           Bookmarks
+//         </div>
+//         <div onClick={() => navigate("/shoppinglist")} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
+//           Shopping List
+//         </div>
+//         <div onClick={logOut} className="py-3 px-4 cursor-pointer rounded-l-lg hover:bg-[#1e6b47] hover:text-black transition duration-300">
+//           Logout
+//         </div>
+//       </div>
+//     </div>
+//   );
+// }
+
+// export default Sidebar;

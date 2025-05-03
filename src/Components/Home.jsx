@@ -1,14 +1,260 @@
-function Home(){
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { 
+  Utensils, 
+  Target, 
+  ShoppingCart,
+  ShieldCheck,
+  Heart,
+  ChevronRight
+} from "lucide-react";
+import BannerImage1 from '../assets/BannerImg1.webp';
+import BannerImage3 from '../assets/BannerImg3.webp';
 
-    return(
-        
-        <div className="pt-[30vh] flex justify-center">
-            <div className="text-4xl font-semibold text-blue-300">Home</div>
+
+const Home = () => {
+  const navigate = useNavigate();
+  const [showFeatures, setShowFeatures] = useState(false);
+  
+  // Animation timing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setShowFeatures(true);
+    }, 2900);
+    
+    return () => clearTimeout(timer);
+  }, []);
+  
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-green-50 to-white overflow-x-hidden">
+      {/* Header with Login Button */}
+      <header className="flex justify-between items-center p-4 md:p-6 lg:p-8">
+        <div className="flex items-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#2E8B57]">Veggify</h1>
+          <span className="ml-3 text-gray-500 hidden md:inline">Your Personal Health Companion</span>
         </div>
-    )
+        <button 
+          onClick={() => navigate("/login")}
+          className="bg-[#2E8B57] hover:bg-[#1e6b47] text-white font-medium py-2 px-6 rounded-lg transition-all duration-300 transform hover:scale-105"
+        >
+          Login
+        </button>
+      </header>
+      
+      {/* Hero Section */}
+      <section className="max-w-6xl mx-auto py-12 px-4 md:px-8 lg:py-20">
+        <div className="flex flex-col md:flex-row items-center gap-8">
+          <div className="md:w-1/2 space-y-6">
+            <h2 className="text-3xl md:text-5xl font-bold text-gray-800 leading-tight">
+              Healthy Eating <span className="text-[#2E8B57]">Simplified</span> For Your Lifestyle
+            </h2>
+            <p className="text-lg text-gray-600">
+              Personalized recipes, goal tracking, and nutrition management to help you adopt and maintain a healthier plant-based lifestyle.
+            </p>
+            <div className="pt-4 flex flex-col sm:flex-row gap-4">
+              <button 
+                onClick={() => navigate("/login")}
+                className="bg-[#2E8B57] hover:bg-[#1e6b47] text-white font-bold py-3 px-8 rounded-lg transition-all duration-300 transform hover:scale-105 flex items-center justify-center"
+              >
+                Get Started <ChevronRight size={20} className="ml-2" />
+              </button>
+              <button 
+                onClick={() => {
+                  const featuresSection = document.getElementById('features');
+                  featuresSection.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="bg-white hover:bg-gray-100 text-[#2E8B57] border-2 border-[#2E8B57] font-bold py-3 px-8 rounded-lg transition-all duration-300"
+              >
+                Learn More
+              </button>
+            </div>
+          </div>
+          <div className="md:w-1/2 flex justify-center">
+            <img 
+              src={BannerImage1}
+              alt="Healthy food illustration" 
+              className="rounded-lg shadow-xl transform transition-all duration-500 hover:rotate-2 hover:scale-105" 
+            />
+          </div>
+        </div>
+      </section>
+      
+      {/* Features Section */}
+      <section id="features" className="py-16 bg-green-50">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">
+            What <span className="text-[#2E8B57]">Veggify</span> Offers
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Feature 1 */}
+            <div 
+              className={`bg-white p-6 rounded-xl shadow-lg transform transition-all duration-500 ${showFeatures ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              style={{ transitionDelay: '100ms' }}
+            >
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Utensils size={28} className="text-[#2E8B57]" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-800">Personalized Recipes</h3>
+              <p className="text-gray-600">
+                Generate custom recipes based on your preferences, dietary restrictions, and available ingredients.
+              </p>
+            </div>
+            
+            {/* Feature 2 */}
+            <div 
+              className={`bg-white p-6 rounded-xl shadow-lg transform transition-all duration-500 ${showFeatures ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              style={{ transitionDelay: '200ms' }}
+            >
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <Target size={28} className="text-[#2E8B57]" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-800">Goal Tracking</h3>
+              <p className="text-gray-600">
+                Set nutrition and health goals with deadlines, and track your progress over time.
+              </p>
+            </div>
+            
+            {/* Feature 3 */}
+            <div 
+              className={`bg-white p-6 rounded-xl shadow-lg transform transition-all duration-500 ${showFeatures ? 'translate-y-0 opacity-100' : 'translate-y-10 opacity-0'}`}
+              style={{ transitionDelay: '300ms' }}
+            >
+              <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6">
+                <ShoppingCart size={28} className="text-[#2E8B57]" />
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-800">Smart Shopping List</h3>
+              <p className="text-gray-600">
+                Automatically generate shopping lists based on your selected recipes and meal plans.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* How It Works Section */}
+      <section className="py-16">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-16">
+            How <span className="text-[#2E8B57]">Veggify</span> Works
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {/* Step 1 */}
+            <div className="text-center">
+              <div className="relative inline-block">
+                <div className="w-24 h-24 rounded-full bg-[#2E8B57] flex items-center justify-center text-white text-3xl font-bold mb-6 mx-auto transform transition-all duration-300 hover:scale-110">
+                  1
+                </div>
+                {/* Connector line */}
+                <div className="hidden md:block absolute top-12 left-full w-full h-1 bg-[#2E8B57]"></div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-800">Create Your Profile</h3>
+              <p className="text-gray-600">
+                Sign up and tell us about your dietary preferences, allergies, and health goals.
+              </p>
+            </div>
+            
+            {/* Step 2 */}
+            <div className="text-center">
+              <div className="relative inline-block">
+                <div className="w-24 h-24 rounded-full bg-[#2E8B57] flex items-center justify-center text-white text-3xl font-bold mb-6 mx-auto transform transition-all duration-300 hover:scale-110">
+                  2
+                </div>
+                {/* Connector line */}
+                <div className="hidden md:block absolute top-12 left-full w-full h-1 bg-[#2E8B57]"></div>
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-800">Discover Recipes & Set Goals</h3>
+              <p className="text-gray-600">
+                Browse personalized recipes and create health goals tailored to your needs.
+              </p>
+            </div>
+            
+            {/* Step 3 */}
+            <div className="text-center">
+              <div className="w-24 h-24 rounded-full bg-[#2E8B57] flex items-center justify-center text-white text-3xl font-bold mb-6 mx-auto transform transition-all duration-300 hover:scale-110">
+                3
+              </div>
+              <h3 className="text-xl font-bold mb-3 text-gray-800">Track & Improve</h3>
+              <p className="text-gray-600">
+                Monitor your progress, adjust your goals, and enjoy a healthier lifestyle.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* Benefits Section */}
+      <section className="py-16 bg-green-50">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
+            Benefits of Using <span className="text-[#2E8B57]">Veggify</span>
+          </h2>
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Benefit 1 */}
+            <div className="flex items-start gap-4">
+              <div className="bg-green-100 p-3 rounded-lg">
+                <Heart size={24} className="text-[#2E8B57]" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Healthier Eating Habits</h3>
+                <p className="text-gray-600">
+                  Develop sustainable eating patterns with nutritionally balanced meal options tailored to your needs.
+                </p>
+              </div>
+            </div>
+            
+            {/* Benefit 2 */}
+            <div className="flex items-start gap-4">
+              <div className="bg-green-100 p-3 rounded-lg">
+                <ShieldCheck size={24} className="text-[#2E8B57]" />
+              </div>
+              <div>
+                <h3 className="text-xl font-bold mb-2 text-gray-800">Diet Compliance</h3>
+                <p className="text-gray-600">
+                  Stay on track with your nutritional goals with personalized reminders and progress tracking.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+      
+      {/* CTA Section */}
+      <section className="py-16">
+        <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+          <h2 className="text-3xl md:text-4xl font-bold text-gray-800 mb-6">
+            Ready to Start Your Health Journey?
+          </h2>
+          <p className="text-xl text-gray-600 mb-8">
+            Join Veggify today and take the first step towards a healthier lifestyle.
+          </p>
+          <button 
+            onClick={() => navigate("/login")}
+            className="bg-[#2E8B57] hover:bg-[#1e6b47] text-white font-bold py-3 px-10 rounded-lg transition-all duration-300 transform hover:scale-105 text-xl"
+          >
+            Sign Up Now
+          </button>
+        </div>
+      </section>
+      
+      {/* Footer */}
+      <footer className="bg-gray-800 text-white py-8">
+        <div className="max-w-6xl mx-auto px-4 md:px-8">
+          <div className="flex flex-col md:flex-row justify-between items-center">
+            <div className="mb-6 md:mb-0">
+              <h2 className="text-3xl font-bold">Veggify</h2>
+              <p className="text-gray-400">Your Personal Health Companion</p>
+            </div>
+            <div className="text-center md:text-right">
+              <p>© {new Date().getFullYear()} Veggify. All rights reserved.</p>
+            </div>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
 
-
-
-}
-
-export default Home
+export default Home;

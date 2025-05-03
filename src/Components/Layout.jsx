@@ -3,11 +3,11 @@ import Sidebar from './Sidebar';
 
 const Layout = ({ children }) => {
   return (
-    <div className="flex gap-[15vh]">
-      <div className="w-[35vh] fixed h-screen">
+    <div className="">
+      <div className="">
         <Sidebar />
       </div>
-      <div className="ml-[35vh] w-full">
+      <div className="">
         {children}
       </div>
     </div>

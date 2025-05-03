@@ -177,19 +177,19 @@ ${
       }
     }
 
-    // 🔄 Send any remaining content
-    if (accumulatedContent) {
-      const recipeId = await saveRecipeToFirebase(
-        userId,
-        accumulatedContent.trim()
-      );
-      res.write(
-        `data: ${JSON.stringify({
-          recipeId,
-          content: marked(accumulatedContent.trim()),
-        })}\n\n`
-      );
-    }
+// Send any remaining content
+if (accumulatedContent) {
+  const recipeId = await saveRecipeToFirestore(
+    userId,
+    accumulatedContent.trim()
+  );
+  res.write(
+    `data: ${JSON.stringify({
+      recipeId,
+      content: marked(accumulatedContent.trim()),
+    })}\n\n`
+  );
+}
 
     res.write("data: [And its done]\n\n");
     console.log(" Recipe generation complete");
