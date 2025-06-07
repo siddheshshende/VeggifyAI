@@ -1,3 +1,4 @@
+
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from 'react-toastify';
@@ -32,7 +33,7 @@ function Sidebar({ logOut, collapsed, setCollapsed }) {
 
   return (
     <div className={`h-screen bg-[#2E8B57] relative transition-all duration-300 ${
-      collapsed ? "w-20" : "w-64"
+      collapsed ? "w-15" : "w-64"
     }`}>
       {/* Collapse toggle button */}
       <button
@@ -45,7 +46,7 @@ function Sidebar({ logOut, collapsed, setCollapsed }) {
       {/* Logo */}
       <div
         onClick={() => navigate("/profile")}
-        className={`font-semibold ${collapsed ? "text-center text-3xl" : "text-5xl"} p-5 text-white cursor-pointer hover:underline truncate`}
+        className={`font-semibold ${collapsed ? "text-center text-3xl sm:text-4xl" : "text-5xl"} p-5 text-white cursor-pointer hover:underline truncate`}
       >
         {collapsed ? "V" : "Veggify"}
       </div>
@@ -79,6 +80,10 @@ function Sidebar({ logOut, collapsed, setCollapsed }) {
 }
 
 export default Sidebar;
+
+
+
+
 
 // import React from "react";
 // import { useNavigate } from "react-router-dom";

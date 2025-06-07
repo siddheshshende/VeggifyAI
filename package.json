@@ -23,9 +23,10 @@
     "openai": "^4.70.2",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "react-markdown": "^9.0.3",
+    "react-firebase-hooks": "^5.1.1",
+    "react-markdown": "^9.1.0",
     "react-router-dom": "^6.27.0",
-    "react-toastify": "^10.0.5",
+    "react-toastify": "^10.0.6",
     "rehype-raw": "^7.0.0",
     "rehype-sanitize": "^6.0.0",
     "sanitize-html": "^2.13.1"

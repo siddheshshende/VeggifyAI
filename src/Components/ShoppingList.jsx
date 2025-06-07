@@ -24,7 +24,7 @@ function ShoppingList() {
     "Protein",
     "Dairy",
     "Spices",
-    "Other"
+    "Other",
   ];
 
   useEffect(() => {
@@ -62,7 +62,7 @@ function ShoppingList() {
 
   const handleAddItem = async (e) => {
     e.preventDefault();
-    
+
     if (!itemInput.trim()) {
       toast.error("Please enter an item name.");
       return;
@@ -96,7 +96,7 @@ function ShoppingList() {
     try {
       const updatedList = shoppingList.filter((item) => item.id !== idToRemove);
       setShoppingList(updatedList);
-      
+
       // Update Firestore
       const listDocRef = doc(db, "ShoppingList", uid);
       await setDoc(listDocRef, { items: updatedList }, { merge: true });
@@ -109,12 +109,12 @@ function ShoppingList() {
 
   const toggleItemCompletion = async (idToToggle) => {
     try {
-      const updatedList = shoppingList.map(item => 
+      const updatedList = shoppingList.map((item) =>
         item.id === idToToggle ? { ...item, completed: !item.completed } : item
       );
-      
+
       setShoppingList(updatedList);
-      
+
       // Update Firestore
       const listDocRef = doc(db, "ShoppingList", uid);
       await setDoc(listDocRef, { items: updatedList }, { merge: true });
@@ -144,18 +144,22 @@ function ShoppingList() {
     }
 
     try {
-      const updatedList = shoppingList.map(item => 
-        item.id === editingItemId 
-          ? { ...item, name: editItemName.trim(), quantity: editItemQuantity.trim() || "1" } 
+      const updatedList = shoppingList.map((item) =>
+        item.id === editingItemId
+          ? {
+              ...item,
+              name: editItemName.trim(),
+              quantity: editItemQuantity.trim() || "1",
+            }
           : item
       );
-      
+
       setShoppingList(updatedList);
-      
+
       // Update Firestore
       const listDocRef = doc(db, "ShoppingList", uid);
       await setDoc(listDocRef, { items: updatedList }, { merge: true });
-      
+
       toast.success("Item updated successfully!");
       cancelEditing(); // Reset edit mode
     } catch (error) {
@@ -166,24 +170,34 @@ function ShoppingList() {
 
   // Group items by category
   const groupedItems = {};
-  categories.forEach(category => {
-    groupedItems[category] = shoppingList.filter(item => item.category === category);
+  categories.forEach((category) => {
+    groupedItems[category] = shoppingList.filter(
+      (item) => item.category === category
+    );
   });
 
   if (isLoading) {
-    return <div className="flex justify-center items-center h-64">Loading your shopping list...</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        Loading your shopping list...
+      </div>
+    );
   }
 
   if (!uid) {
-    return <div className="flex justify-center items-center h-64">Please log in to view your shopping list.</div>;
+    return (
+      <div className="flex justify-center items-center h-64">
+        Please log in to view your shopping list.
+      </div>
+    );
   }
 
   return (
-    <div className="p-6">
-      <div className="pt-[5vh] font-semibold text-3xl">
+    <div className="px-6 py-4">
+      <div className="pt-[5vh] font-bold text-3xl sm:text-4xl">
         Shopping List
       </div>
-      
+
       {/* Add Item Form */}
       <div className="mt-8 mb-8 p-6 border rounded-md shadow-sm">
         <h3 className="text-xl font-medium mb-4">Add New Item</h3>
@@ -199,7 +213,7 @@ function ShoppingList() {
               required
             />
           </div>
-          
+
           <div className="flex flex-col">
             <label className="mb-1 font-medium">Quantity</label>
             <input
@@ -210,14 +224,13 @@ function ShoppingList() {
               className="border p-2 rounded"
             />
           </div>
-          
+
           <div className="flex flex-col">
             <label className="mb-1 font-medium">Category</label>
             <select
               value={categoryInput}
               onChange={(e) => setCategoryInput(e.target.value)}
-              className="border p-2 rounded"
-            >
+              className="border p-2 rounded">
               {categories.map((category) => (
                 <option key={category} value={category}>
                   {category}
@@ -225,18 +238,17 @@ function ShoppingList() {
               ))}
             </select>
           </div>
-          
+
           <div className="self-end">
-            <button 
-              type="submit" 
-              className="bg-[#2E8B57] text-white px-4 py-2 rounded hover:bg-[#1e6b47] transition duration-300"
-            >
+            <button
+              type="submit"
+              className="bg-[#2E8B57] text-white px-4 py-2 rounded hover:bg-[#1e6b47] transition duration-300">
               Add Item
             </button>
           </div>
         </form>
       </div>
-      
+
       {/* Shopping List Items by Category */}
       {shoppingList.length === 0 ? (
         <div className="text-center p-8 text-gray-500">
@@ -244,103 +256,114 @@ function ShoppingList() {
         </div>
       ) : (
         <div>
-          {categories.map((category) => (
-            groupedItems[category].length > 0 && (
-              <div key={category} className="mb-6">
-                <h3 className="text-xl font-bold mb-2">{category}</h3>
-                <div className="border rounded-md overflow-hidden">
-                  <table className="w-full border-collapse">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="text-left p-3">Item</th>
-                        <th className="text-left p-3">Quantity</th>
-                        <th className="text-right p-3">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {groupedItems[category].map((item) => (
-                        <tr key={item.id} className="border-t">
-                          <td className="p-3 flex items-center">
-                            {editingItemId === item.id ? (
-                              <input
-                                type="text"
-                                value={editItemName}
-                                onChange={(e) => setEditItemName(e.target.value)}
-                                className="border p-1 rounded w-full"
-                                autoFocus
-                              />
-                            ) : (
-                              <>
-                                <input
-                                  type="checkbox"
-                                  checked={item.completed}
-                                  onChange={() => toggleItemCompletion(item.id)}
-                                  className="mr-3"
-                                  title="Item Completed"
-                                />
-                                <span className={item.completed ? "line-through text-gray-400" : ""}>
-                                  {item.name}
-                                </span>
-                              </>
-                            )}
-                          </td>
-                          <td className="p-3">
-                            {editingItemId === item.id ? (
-                              <input
-                                type="text"
-                                value={editItemQuantity}
-                                onChange={(e) => setEditItemQuantity(e.target.value)}
-                                className="border p-1 rounded w-full"
-                              />
-                            ) : (
-                              <span className={item.completed ? "text-gray-400" : ""}>
-                                {item.quantity}
-                              </span>
-                            )}
-                          </td>
-                          <td className="p-3 text-right">
-                            {editingItemId === item.id ? (
-                              <div className="flex justify-end gap-2">
-                                <button
-                                  onClick={saveItemEdit}
-                                  className="text-green-600 font-medium"
-                                >
-                                  Save
-                                </button>
-                                <button
-                                  onClick={cancelEditing}
-                                  className="text-gray-500 font-medium"
-                                >
-                                  Cancel
-                                </button>
-                              </div>
-                            ) : (
-                              <div className="flex justify-end gap-3">
-                                <button
-                                  onClick={() => startEditingItem(item)}
-                                  className="text-blue-500 font-medium"
-                                  title="Edit Item"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => handleRemoveItem(item.id)}
-                                  className="text-red-500 font-bold"
-                                  title="Remove Item"
-                                >
-                                  -
-                                </button>
-                              </div>
-                            )}
-                          </td>
+          {categories.map(
+            (category) =>
+              groupedItems[category].length > 0 && (
+                <div key={category} className="mb-6">
+                  <h3 className="text-xl font-bold mb-2">{category}</h3>
+                  <div className="border rounded-md overflow-hidden">
+                    <table className="w-full border-collapse">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="text-left p-3">Item</th>
+                          <th className="text-left p-3">Quantity</th>
+                          <th className="text-right p-3">Actions</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {groupedItems[category].map((item) => (
+                          <tr key={item.id} className="border-t">
+                            <td className="p-3 flex items-center">
+                              {editingItemId === item.id ? (
+                                <input
+                                  type="text"
+                                  value={editItemName}
+                                  onChange={(e) =>
+                                    setEditItemName(e.target.value)
+                                  }
+                                  className="border p-1 rounded w-full"
+                                  autoFocus
+                                />
+                              ) : (
+                                <>
+                                  <input
+                                    type="checkbox"
+                                    checked={item.completed}
+                                    onChange={() =>
+                                      toggleItemCompletion(item.id)
+                                    }
+                                    className="mr-3"
+                                    title="Item Completed"
+                                  />
+                                  <span
+                                    className={
+                                      item.completed
+                                        ? "line-through text-gray-400"
+                                        : ""
+                                    }>
+                                    {item.name}
+                                  </span>
+                                </>
+                              )}
+                            </td>
+                            <td className="p-3">
+                              {editingItemId === item.id ? (
+                                <input
+                                  type="text"
+                                  value={editItemQuantity}
+                                  onChange={(e) =>
+                                    setEditItemQuantity(e.target.value)
+                                  }
+                                  className="border p-1 rounded w-full"
+                                />
+                              ) : (
+                                <span
+                                  className={
+                                    item.completed ? "text-gray-400" : ""
+                                  }>
+                                  {item.quantity}
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-3 text-right">
+                              {editingItemId === item.id ? (
+                                <div className="flex justify-end gap-2">
+                                  <button
+                                    onClick={saveItemEdit}
+                                    className="text-green-600 font-medium">
+                                    Save
+                                  </button>
+                                  <button
+                                    onClick={cancelEditing}
+                                    className="text-gray-500 font-medium">
+                                    Cancel
+                                  </button>
+                                </div>
+                              ) : (
+                                <div className="flex justify-end gap-3">
+                                  <button
+                                    onClick={() => startEditingItem(item)}
+                                    className="text-blue-500 font-medium"
+                                    title="Edit Item">
+                                    Edit
+                                  </button>
+                                  <button
+                                    onClick={() => handleRemoveItem(item.id)}
+                                    className="text-red-500 font-bold"
+                                    title="Remove Item">
+                                    x
+                                  </button>
+                                </div>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
-              </div>
-            )
-          ))}
+              )
+          )}
         </div>
       )}
     </div>

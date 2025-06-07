@@ -1,9 +1,8 @@
 
 import React, { useEffect, useRef, useState } from "react";
+import RecipeDisplay from './RecipeDisplay'; 
 import { onAuthStateChanged } from 'firebase/auth';
 import { getAuth } from 'firebase/auth';
-import RecipeDisplay from './RecipeDisplay'; 
-import axios from 'axios';
 
 const RecipeCard = ({ onSubmit, userId }) => {
   const [ingredients, setIngredients] = useState("");
@@ -27,7 +26,7 @@ const RecipeCard = ({ onSubmit, userId }) => {
 
 
   return (
-    <div className="w-[400px] h-[565px] border rounded-lg overflow-hidden shadow-lg">
+    <div className="w-[400px] h-[565px] border rounded-lg overflow-hidden shadow-lg mt-8">
       <div className="px-6 py-4">
         <div className="font-bold text-xl mb-2">Recipe Generator</div>
         <div className="mb-4">
@@ -97,7 +96,7 @@ const RecipeCard = ({ onSubmit, userId }) => {
         </div>
         <div className="place-self-center">
           <button
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg"
             type="button"
             onClick={handleSubmit}
           >
@@ -117,6 +116,7 @@ function Recipes() {
   const [recipeData, setRecipeData] = useState(null);
   const [recipeText, setRecipeText] = useState("");
   const [generatedRecipeId, setGeneratedRecipeId] = useState(null);
+  
   const eventSourceRef = useRef(null);
 
   useEffect(() => {
@@ -186,33 +186,21 @@ function Recipes() {
   }, []);
 
   
-  const addBookmark = async () => {
-    if (!generatedRecipeId) {  // Ensure recipeId exists
-      console.error("No recipe ID found for bookmarking");
-      return;
-    }
-  
-    try {
-      await axios.post('/api/bookmarks', { recipeId: generatedRecipeId, userId });
-      alert("Recipe bookmarked successfully!");
-    } catch (error) {
-      console.error("Error bookmarking recipe:", error);
-    }
-  };
+
   
   return (
     <div className="App-RecipeContainer">
       <div className="flex flex-col md:flex-row gap-2 justify-center ">
         <RecipeCard onSubmit={onSubmit} userId={userId} />
-        <div className="w-[400px] h-[565px] text-xs text-gray-600 p-4 border rounded-lg shadow-xl overflow-y-auto">
-          <RecipeDisplay text={recipeText} />  
+        <div className="w-[400px] h-[565px] mt-8 text-xs text-gray-600 p-4 border rounded-lg shadow-xl overflow-y-auto">
+          <RecipeDisplay   text={recipeText} 
+            userId={userId} 
+            generatedRecipeId={generatedRecipeId} />  
         </div>
       </div>
       <div>
   </div>
-<button 
-  className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg focus:outline-none focus:shadow-outline text-center m-4"
-  onClick={addBookmark}>Bookmark Recipe</button> 
+
     </div>
   );
 }
