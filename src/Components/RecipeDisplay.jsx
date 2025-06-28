@@ -96,7 +96,7 @@ const RecipeDisplay = ({ text, userId, generatedRecipeId }) => {
         {finalText}
       </ReactMarkdown>
       <button
-        className={`bg-green-700 hover:bg-green-900 text-white font-bold py-2 px-4 rounded-lg text-base text-center m-4 ${
+        className={`bg-green-700 transition-colors ease-in-out duration-300 hover:bg-green-900 text-white font-bold py-2 px-4 rounded-lg text-base text-center m-4 ${
           isBookmarking ? "opacity-50 cursor-not-allowed" : ""
         }`}
         onClick={addBookmark}

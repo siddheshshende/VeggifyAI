@@ -4,6 +4,7 @@ import { auth, db } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { Trash2 } from "lucide-react";
 
 function ShoppingList() {
   const [uid, setUid] = useState(null);
@@ -193,8 +194,8 @@ function ShoppingList() {
   }
 
   return (
-    <div className="px-6 py-4">
-      <div className="pt-[5vh] font-bold text-3xl sm:text-4xl">
+    <div className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-10">
+      <div className="font-bold text-3xl sm:text-4xl">
         Shopping List
       </div>
 
@@ -343,15 +344,15 @@ function ShoppingList() {
                                 <div className="flex justify-end gap-3">
                                   <button
                                     onClick={() => startEditingItem(item)}
-                                    className="text-blue-500 font-medium"
+                                    className="text-blue-500 hover:text-blue-700 font-medium"
                                     title="Edit Item">
                                     Edit
                                   </button>
                                   <button
                                     onClick={() => handleRemoveItem(item.id)}
-                                    className="text-red-500 font-bold"
+                                    className="text-red-500 hover:text-red-700 font-bold"
                                     title="Remove Item">
-                                    x
+                                 <Trash2 className="w-5 h-5 " />
                                   </button>
                                 </div>
                               )}

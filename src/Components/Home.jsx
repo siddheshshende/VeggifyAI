@@ -31,7 +31,7 @@ const Home = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-green-50 to-white overflow-x-hidden">
       {/* Header with Login Button */}
-      <header className="flex justify-between items-center p-4 md:p-6 lg:p-8">
+      <header className="flex justify-between items-center 3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-6 sm:py-8">
         <div>
           <h1 className="text-4xl md:text-5xl font-bold text-[#2E8B57]">Veggify</h1>
           <p className="text-gray-500 mt-2 hidden md:block">Your Personal Health Companion</p>
@@ -45,7 +45,7 @@ const Home = () => {
       </header>
       
       {/* Hero Section */}
-      <section className="max-w-6xl mx-auto py-12 px-4 md:px-8 lg:py-20">
+      <section className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-12 sm:py-20">
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="md:w-1/2 space-y-6">
             <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-800 leading-tight">
@@ -83,8 +83,8 @@ const Home = () => {
       </section>
       
       {/* Health-Conscious USP Section - New */}
-      <section className="py-16 bg-green-100">
-        <div className="max-w-6xl mx-auto px-4 md:px-8 text-center">
+      <section className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-12 sm:py-20 bg-green-100">
+        <div className="text-center">
           <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold text-center text-gray-800 mb-8">
             Recipes customized to <span className="text-[#2E8B57]">Your Health Needs</span>
           </h2>
@@ -126,8 +126,8 @@ const Home = () => {
       </section>
       
       {/* Features Section */}
-      <section id="features" className="py-16 bg-green-50">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
+      <section id="features" className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-12 sm:py-20 bg-green-50">
+        <div className="">
           <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold text-center text-gray-800 mb-16">
             What <span className="text-[#2E8B57]">Veggify</span> Offers
           </h2>
@@ -210,8 +210,8 @@ const Home = () => {
       </section>
       
       {/* How It Works Section */}
-      <section className="py-16">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
+      <section className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-12 sm:py-20">
+        <div className="">
           <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold text-center text-gray-800 mb-16">
             How <span className="text-[#2E8B57]">Veggify</span> Works
           </h2>
@@ -262,8 +262,8 @@ const Home = () => {
       </section>
       
       {/* Benefits Section */}
-      <section className="py-16 bg-green-50">
-        <div className="max-w-6xl mx-auto px-4 md:px-8">
+      <section className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-12 sm:py-20 bg-green-50">
+        <div className="">
           <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold text-center text-gray-800 mb-12">
             Benefits of Using <span className="text-[#2E8B57]">Veggify</span>
           </h2>
@@ -299,8 +299,8 @@ const Home = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="py-16">
-        <div className="max-w-4xl mx-auto px-4 md:px-8 text-center">
+      <section className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-12 sm:py-20">
+        <div className=" text-center">
           <h2 className="text-3xl sm:text-4xl md:text-4xl font-bold text-gray-800 mb-6">
             Ready to Start Your Health Journey?
           </h2>

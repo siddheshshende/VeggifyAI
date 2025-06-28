@@ -1,35 +1,39 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
+import {
+  BrowserRouter,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+} from "react-router-dom";
+import React from "react"; 
+import { useState, useEffect } from "react";
 import Recipes from "./Components/Recipes";
 import Bookmarks from "./Components/Bookmarks";
 import GoalTracking from "./Components/GoalTracking";
 import Profile from "./Components/Profile";
 import Home from "./Components/Home";
 import ShoppingList from "./Components/ShoppingList";
-import Sidebar from './Components/Sidebar';
-import Login from './Components/Login';
-import { auth } from '../src/config/firebase';
+// import Sidebar from "./Components/Sidebar";
+// import MobileSidebar from "./Components/MobileSidebar";
+import Login from "./Components/Login";
+import { auth } from "../src/config/firebase";
 import { signOut } from "firebase/auth";
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import Layout from "./Components/Layout"; // import your Layout
 
-function App() {
+function AppContent() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [loadingAuth, setLoadingAuth] = useState(true);
+  const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged((user) => {
       setIsLoggedIn(!!user);
+      setLoadingAuth(false);
     });
     return () => unsubscribe();
   }, []);
-
-  const ProtectedRoute = ({ children }) => {
-    if (!isLoggedIn) {
-      return <Navigate to="/login" replace />;
-    }
-    return children;
-  };
 
   const logOut = async () => {
     try {
@@ -40,66 +44,375 @@ function App() {
     }
   };
 
-  return (
-    <div>
-      <BrowserRouter>
-        <div>
-          <div className={isLoggedIn ? (sidebarCollapsed ? 'mr-0' : 'mr-0') : ''}>
-            {isLoggedIn && (
-              <div className="fixed h-screen ">
-                <Sidebar 
-                  logOut={logOut}
-                  collapsed={sidebarCollapsed} 
-                  setCollapsed={setSidebarCollapsed} 
-                />
-              </div>
-            )}
-          </div>
-          <div className={`transition-all duration-300 ${isLoggedIn ? (sidebarCollapsed ? 'ml-20' : 'ml-64') : ''}`}>
-            <Routes>
-              {/* Public routes */}
-              <Route path="/" element={<Home />} />
-              <Route 
-                path="/login" 
-                element={isLoggedIn ? <Navigate to="/profile" replace /> : <Login />} 
-              />
+  const ProtectedRoute = ({ children }) => {
+    if (!isLoggedIn) return <Navigate to="/login" replace />;
+    return (
+      <Layout logOut={logOut}>
+        {React.cloneElement(children, { logOut })}
+      </Layout>
+    );
+  };
 
-              {/* Protected routes */}
-              <Route path="/recipes" element={
-                <ProtectedRoute>
-                  <Recipes />
-                </ProtectedRoute>
-              } />
-              <Route path="/bookmarks" element={
-                <ProtectedRoute>
-                  <Bookmarks />
-                </ProtectedRoute>
-              } />
-              <Route path="/goaltracking" element={
-                <ProtectedRoute>
-                  <GoalTracking />
-                </ProtectedRoute>
-              } />
-              <Route path="/profile" element={
-                <ProtectedRoute>
-                  <Profile />
-                </ProtectedRoute>
-              } />
-              <Route path="/shoppinglist" element={
-                <ProtectedRoute>
-                  <ShoppingList />
-                </ProtectedRoute>
-              } />
-
-              {/* Catch-all route */}
-              {/* <Route path="*" element={<Navigate to="/" replace />} /> */}
-            </Routes>
+  if (loadingAuth) {
+    return (
+      <div className="flex justify-center items-center h-screen bg-white">
+        <div className="relative overflow-hidden pb-2 mb-6">
+          <h1 className="text-[#1e6b47] pb-2 text-4xl sm:text-6xl font-semibold capitalize opacity-0 animate-slide-fade-in">
+            Veggify
+          </h1>
+          <div className="absolute left-0 bottom-0 w-full h-[3px] bg-[#1e6b47] overflow-hidden">
+            <div className="absolute top-0 right-0 w-full h-full bg-white origin-right scale-x-100 animate-mask-slide"></div>
           </div>
         </div>
-      </BrowserRouter>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <Routes>
+        {/* Public Routes */}
+        <Route path="/" element={<Home />} />
+        <Route
+          path="/login"
+          element={isLoggedIn ? <Navigate to="/profile" /> : <Login />}
+        />
+
+        {/* Protected Routes inside Layout */}
+        <Route
+          path="/recipes"
+          element={
+            <ProtectedRoute>
+              <Recipes />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/bookmarks"
+          element={
+            <ProtectedRoute>
+              <Bookmarks />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/goaltracking"
+          element={
+            <ProtectedRoute>
+              <GoalTracking />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/shoppinglist"
+          element={
+            <ProtectedRoute>
+              <ShoppingList />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
       <ToastContainer />
-    </div>
+    </>
   );
 }
 
-export default App;
+export default function App() {
+  return (
+    <BrowserRouter>
+      <AppContent />
+    </BrowserRouter>
+  );
+}
+
+// import {
+//   BrowserRouter,
+//   Routes,
+//   Route,
+//   Navigate,
+//   useLocation,
+// } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import Recipes from "./Components/Recipes";
+// import Bookmarks from "./Components/Bookmarks";
+// import GoalTracking from "./Components/GoalTracking";
+// import Profile from "./Components/Profile";
+// import Home from "./Components/Home";
+// import ShoppingList from "./Components/ShoppingList";
+// import Sidebar from "./Components/Sidebar";
+// import Login from "./Components/Login";
+// import { auth } from "../src/config/firebase";
+// import { signOut } from "firebase/auth";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// function AppContent() {
+//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   const [loadingAuth, setLoadingAuth] = useState(true);
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+//   const location = useLocation();
+//   const showSidebar =
+//     isLoggedIn && !["/", "/login"].includes(location.pathname);
+
+//   useEffect(() => {
+//     const unsubscribe = auth.onAuthStateChanged((user) => {
+//       setIsLoggedIn(!!user);
+//       setLoadingAuth(false);
+//     });
+//     return () => unsubscribe();
+//   }, []);
+
+//   const logOut = async () => {
+//     try {
+//       await signOut(auth);
+//       setIsLoggedIn(false);
+//     } catch (err) {
+//       console.error("Failed to log out:", err.message);
+//     }
+//   };
+
+//   const ProtectedRoute = ({ children }) => {
+//     if (!isLoggedIn) return <Navigate to="/login" replace />;
+//     return children;
+//   };
+
+//   if (loadingAuth) {
+//     return (
+//       <div className="flex justify-center items-center h-screen bg-white">
+//         <div className="relative overflow-hidden pb-2 mb-6">
+//           <h1 className="text-[#1e6b47] pb-2 text-4xl sm:text-6xl font-semibold capitalize opacity-0 animate-slide-fade-in">
+//             Veggify
+//           </h1>
+//           <div className="absolute left-0 bottom-0 w-full h-[3px] bg-[#1e6b47] overflow-hidden">
+//             <div className="absolute top-0 right-0 w-full h-full bg-white origin-right scale-x-100 animate-mask-slide"></div>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <>
+//       <div className={showSidebar ? (sidebarCollapsed ? "mr-0" : "mr-0") : ""}>
+//         {showSidebar && (
+//           <div className="fixed h-screen">
+//             <Sidebar
+//               logOut={logOut}
+//               collapsed={sidebarCollapsed}
+//               setCollapsed={setSidebarCollapsed}
+//             />
+//           </div>
+//         )}
+//       </div>
+
+//       <div
+//         className={`transition-all duration-300 ${
+//           showSidebar ? (sidebarCollapsed ? "ml-20" : "ml-64") : ""
+//         }`}>
+//         <Routes>
+//           {/* Public Routes */}
+//           <Route path="/" element={<Home />} />
+//           <Route
+//             path="/login"
+//             element={isLoggedIn ? <Navigate to="/profile" /> : <Login />}
+//           />
+
+//           {/* Protected Routes */}
+//           <Route
+//             path="/recipes"
+//             element={
+//               <ProtectedRoute>
+//                 <Recipes />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/bookmarks"
+//             element={
+//               <ProtectedRoute>
+//                 <Bookmarks />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/goaltracking"
+//             element={
+//               <ProtectedRoute>
+//                 <GoalTracking />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/profile"
+//             element={
+//               <ProtectedRoute>
+//                 <Profile />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/shoppinglist"
+//             element={
+//               <ProtectedRoute>
+//                 <ShoppingList />
+//               </ProtectedRoute>
+//             }
+//           />
+//         </Routes>
+//       </div>
+//       <ToastContainer />
+//     </>
+//   );
+// }
+
+// export default function App() {
+//   return (
+//     <BrowserRouter>
+//       <AppContent />
+//     </BrowserRouter>
+//   );
+// }
+
+// import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+// import { useState, useEffect } from "react";
+// import Recipes from "./Components/Recipes";
+// import Bookmarks from "./Components/Bookmarks";
+// import GoalTracking from "./Components/GoalTracking";
+// import Profile from "./Components/Profile";
+// import Home from "./Components/Home";
+// import ShoppingList from "./Components/ShoppingList";
+// import Sidebar from "./Components/Sidebar";
+// import Login from "./Components/Login";
+// import { auth } from "../src/config/firebase";
+// import { signOut } from "firebase/auth";
+// import { ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// function App() {
+//   const [isLoggedIn, setIsLoggedIn] = useState(false);
+//   const [loadingAuth, setLoadingAuth] = useState(true);
+//   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+//   useEffect(() => {
+//     const unsubscribe = auth.onAuthStateChanged((user) => {
+//       setIsLoggedIn(!!user);
+//       setLoadingAuth(false);
+//     });
+//     return () => unsubscribe();
+//   }, []);
+
+//   const logOut = async () => {
+//     try {
+//       await signOut(auth);
+//       setIsLoggedIn(false);
+//     } catch (err) {
+//       console.error("Failed to log out:", err.message);
+//     }
+//   };
+
+//   const ProtectedRoute = ({ children }) => {
+//     if (!isLoggedIn) return <Navigate to="/login" replace />;
+//     return children;
+//   };
+
+//   if (loadingAuth) {
+//     return (
+//       <div className="flex justify-center items-center h-screen bg-white">
+//         <div className="relative overflow-hidden pb-2 mb-6">
+//           {/* Text */}
+//           <h1 className="text-[#1e6b47] pb-2 text-4xl sm:text-6xl font-semibold capitalize opacity-0 animate-slide-fade-in">
+//             Veggify
+//           </h1>
+
+//           {/* Animated line mask */}
+//           <div className="absolute left-0 bottom-0 w-full h-[3px] bg-[#1e6b47] overflow-hidden">
+//             <div className="absolute top-0 right-0 w-full h-full bg-white origin-right scale-x-100 animate-mask-slide"></div>
+//           </div>
+//         </div>
+//       </div>
+//     );
+//   }
+
+//   return (
+//     <BrowserRouter>
+//       <div className={isLoggedIn ? (sidebarCollapsed ? "mr-0" : "mr-0") : ""}>
+//         {isLoggedIn && (
+//           <div className="fixed h-screen">
+//             <Sidebar
+//               logOut={logOut}
+//               collapsed={sidebarCollapsed}
+//               setCollapsed={setSidebarCollapsed}
+//             />
+//           </div>
+//         )}
+//       </div>
+//       <div
+//         className={`transition-all duration-300 ${
+//           isLoggedIn ? (sidebarCollapsed ? "ml-20" : "ml-64") : ""
+//         }`}>
+//         <Routes>
+//           {/* Public Routes */}
+//           <Route path="/" element={<Home />} />
+//           <Route
+//             path="/login"
+//             element={isLoggedIn ? <Navigate to="/profile" /> : <Login />}
+//           />
+
+//           {/* Protected Routes */}
+//           <Route
+//             path="/recipes"
+//             element={
+//               <ProtectedRoute>
+//                 <Recipes />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/bookmarks"
+//             element={
+//               <ProtectedRoute>
+//                 <Bookmarks />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/goaltracking"
+//             element={
+//               <ProtectedRoute>
+//                 <GoalTracking />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/profile"
+//             element={
+//               <ProtectedRoute>
+//                 <Profile />
+//               </ProtectedRoute>
+//             }
+//           />
+//           <Route
+//             path="/shoppinglist"
+//             element={
+//               <ProtectedRoute>
+//                 <ShoppingList />
+//               </ProtectedRoute>
+//             }
+//           />
+//         </Routes>
+//       </div>
+//       <ToastContainer />
+//     </BrowserRouter>
+//   );
+// }
+
+// export default App;

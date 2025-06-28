@@ -41,18 +41,17 @@ function Profile() {
   };
 
   const handleAddAllergy = async () => {
-     if (allergyInput.trim()) {
-    // Normalize to lowercase for comparison but store original input
-    const normalizedInput = allergyInput.trim().toLowerCase();
-    const isDuplicate = allergies.some(allergy => 
-      allergy.toLowerCase() === normalizedInput
-    );
+    if (allergyInput.trim()) {
+      // Normalize to lowercase for comparison but store original input
+      const normalizedInput = allergyInput.trim().toLowerCase();
+      const isDuplicate = allergies.some(
+        (allergy) => allergy.toLowerCase() === normalizedInput
+      );
 
-    if (isDuplicate) {
-      toast.warning("This allergy has already been added.");
-      return;
-    }
-
+      if (isDuplicate) {
+        toast.warning("This allergy has already been added.");
+        return;
+      }
 
       const updatedAllergies = [...allergies, allergyInput.trim()]; // Create the updated list here
       setAllergies(updatedAllergies);
@@ -78,7 +77,7 @@ function Profile() {
         console.log(error);
         toast.error("An error occurred while submitting your details.");
       }
-    } 
+    }
   };
 
   const handleRemoveAllergy = async (indexToRemove) => {
@@ -481,83 +480,81 @@ function Profile() {
           </div>
         </div>
 
-    
         {/* Allergies Section */}
         <div className="">
           <div className="flex items-center justify-content pt-[5vh] gap-4">
             <div className="text-3xl sm:text-4xl font-bold">Allergies</div>
-            <div className="hidden sm:block"> {/* Desktop version - hidden on mobile */}
-      {!allergyToggle ? (
-        <button 
-          onClick={handleAllergyToggle}
-          className="text-3xl sm:text-4xl font-bold cursor-pointer"
-        >
-          +
-        </button>
-      ) : (
-        <div className="flex flex-row gap-2 w-full max-w-[800px]">
-          <input
-            placeholder="Enter Food Item"
-            value={allergyInput}
-            onChange={handleAllergyInputChange}
-            className="bg-gray-100 px-4 py-2 rounded-full border flex-grow"
-            onKeyPress={(e) => e.key === 'Enter' && handleAddAllergy()}
-          />
-          <div className="flex gap-2">
-            <button 
-              onClick={handleAddAllergy} 
-              className="px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors"
-            >
-              Add
-            </button>
-            <button 
-              onClick={() => setAllergyToggle(false)}
-              className="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors"
-            >
-              Cancel
+            <div className="hidden sm:block">
+              {" "}
+              {/* Desktop version - hidden on mobile */}
+              {!allergyToggle ? (
+                <button
+                  onClick={handleAllergyToggle}
+                  className="text-3xl sm:text-4xl font-bold cursor-pointer">
+                  +
+                </button>
+              ) : (
+                <div className="flex flex-row gap-2 w-full max-w-[800px]">
+                  <input
+                    placeholder="Enter Food Item"
+                    value={allergyInput}
+                    onChange={handleAllergyInputChange}
+                    className="bg-gray-100 px-4 py-2 rounded-full border flex-grow"
+                    onKeyPress={(e) => e.key === "Enter" && handleAddAllergy()}
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleAddAllergy}
+                      className="px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors">
+                      Add
+                    </button>
+                    <button
+                      onClick={() => setAllergyToggle(false)}
+                      className="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors">
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+            {/* Mobile toggle button - hidden on desktop */}
+            <button
+              onClick={handleAllergyToggle}
+              className="text-3xl sm:text-4xl font-bold cursor-pointer sm:hidden">
+              {allergyToggle ? "−" : "+"}
             </button>
           </div>
-        </div>
-      )}
-    </div>
-    {/* Mobile toggle button - hidden on desktop */}
-    <button 
-      onClick={handleAllergyToggle}
-      className="text-3xl sm:text-4xl font-bold cursor-pointer sm:hidden"
-    >
-      {allergyToggle ? '−' : '+'}
-    </button>
-  </div>
 
-  {/* Combined input field that works for both mobile and desktop */}
-  {allergyToggle && (
-    <div className="sm:hidden mt-4 max-w-[800px] mx-auto"> {/* Mobile layout */}
-      <div className="flex flex-col gap-2 sm:flex-row"> {/* Responsive layout */}
-        <input
-          placeholder="Enter Food Item"
-          value={allergyInput}
-          onChange={handleAllergyInputChange}
-          className="bg-gray-100 px-4 py-2 rounded-full border w-full"
-          onKeyPress={(e) => e.key === 'Enter' && handleAddAllergy()}
-        />
-        <div className="flex gap-2">
-          <button 
-            onClick={handleAddAllergy} 
-            className="px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors flex-grow sm:flex-grow-0"
-          >
-            Add
-          </button>
-          <button 
-            onClick={() => setAllergyToggle(false)}
-            className="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors flex-grow sm:flex-grow-0"
-          >
-            Cancel
-          </button>
-        </div>
-      </div>
-    </div>
-  )}
-
+          {/* Combined input field that works for both mobile and desktop */}
+          {allergyToggle && (
+            <div className="sm:hidden mt-4 max-w-[800px] mx-auto">
+              {" "}
+              {/* Mobile layout */}
+              <div className="flex flex-col gap-2 sm:flex-row">
+                {" "}
+                {/* Responsive layout */}
+                <input
+                  placeholder="Enter Food Item"
+                  value={allergyInput}
+                  onChange={handleAllergyInputChange}
+                  className="bg-gray-100 px-4 py-2 rounded-full border w-full"
+                  onKeyPress={(e) => e.key === "Enter" && handleAddAllergy()}
+                />
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleAddAllergy}
+                    className="px-4 py-2 bg-black text-white rounded-full hover:bg-gray-800 transition-colors flex-grow sm:flex-grow-0">
+                    Add
+                  </button>
+                  <button
+                    onClick={() => setAllergyToggle(false)}
+                    className="px-4 py-2 bg-gray-200 rounded-full hover:bg-gray-300 transition-colors flex-grow sm:flex-grow-0">
+                    Cancel
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
 
           <div className="border border-gray-300 p-4 m-4 max-w-[800px] mx-auto rounded-lg">
             {allergies.length > 0 ? (

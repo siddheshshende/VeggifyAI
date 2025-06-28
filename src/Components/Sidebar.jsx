@@ -32,7 +32,7 @@ function Sidebar({ logOut, collapsed, setCollapsed }) {
   ];
 
   return (
-    <div className={`h-screen bg-[#2E8B57] relative transition-all duration-300 ${
+    <div className={`h-full bg-[#2E8B57] relative transition-all ease-in-out duration-300 ${
       collapsed ? "w-15" : "w-64"
     }`}>
       {/* Collapse toggle button */}

@@ -440,8 +440,8 @@ function GoalsTracking() {
   }
 
   return (
-    <div className="px-6 py-4">
-      <div className="pt-[5vh] font-bold text-3xl sm:text-4xl block sm:flex justify-between items-center">
+    <div className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-10">
+      <div className=" font-bold text-3xl sm:text-4xl block sm:flex justify-between items-center">
         <span className="block">Goals Tracking</span>
         <button
           onClick={() => setShowForm(!showForm)}
