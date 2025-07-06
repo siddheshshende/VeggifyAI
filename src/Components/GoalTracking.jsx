@@ -3,14 +3,32 @@ import {
   doc,
   setDoc,
   getDoc,
-  collection,
-  addDoc,
   serverTimestamp,
+  collection,
+  addDoc
 } from "firebase/firestore";
 import { auth, db } from "../config/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import GoalLogs from "./GoalLogs";
+
+// Helper function to log goal activities
+const logGoalActivity = async (uid, action, goalId, additionalData = {}) => {
+  if (!uid) return;
+
+  try {
+    await addDoc(collection(db, "GoalLogs"), {
+      userId: uid,
+      action,
+      goalId,
+      timestamp: serverTimestamp(),
+      ...additionalData,
+    });
+  } catch (error) {
+    console.error("Error logging goal activity:", error);
+  }
+};
 
 function GoalsTracking() {
   const [uid, setUid] = useState(null);
@@ -98,7 +116,7 @@ function GoalsTracking() {
     setShowForm(false);
   };
 
-  const today = new Date().toISOString().split("T")[0]; // Format: YYYY-MM-DD
+  const today = new Date().toISOString().split("T")[0];
 
   const handleAddGoal = async (e) => {
     e.preventDefault();
@@ -114,10 +132,7 @@ function GoalsTracking() {
     }
 
     try {
-      // Format deadline date for tracking
       const deadlineDate = deadline ? new Date(deadline) : null;
-
-      // Create the goal object WITHOUT serverTimestamp in the array
       const newGoal = {
         title: goalTitle.trim(),
         description: goalDescription.trim(),
@@ -135,56 +150,47 @@ function GoalsTracking() {
           allergies: userAllergies,
           chronicDiseases: userChronicDiseases,
         },
-        // Removed serverTimestamp from here
         id: Date.now().toString(),
-        // Removed lastUpdated from here
-        createdAt: new Date().toISOString(), // Use client timestamp instead
+        createdAt: new Date().toISOString(),
       };
 
       let updatedGoals;
 
       if (editingGoalId) {
-        // Update existing goal
         updatedGoals = goals.map((goal) =>
           goal.id === editingGoalId
             ? {
                 ...newGoal,
                 id: editingGoalId,
-                // Preserve original createdAt if editing
                 createdAt: goal.createdAt,
               }
             : goal
         );
         toast.success("Goal updated successfully!");
+        await logGoalActivity(uid, "edited", editingGoalId, {
+          newTitle: goalTitle.trim(),
+          newProgress: newGoal.progress,
+        });
       } else {
-        // Add new goal
         updatedGoals = [...goals, newGoal];
         toast.success("New goal added!");
-
-        // Log goal creation for analytics
-        await addDoc(collection(db, "GoalLogs"), {
-          userId: uid,
-          action: "created",
-          goalId: newGoal.id,
-          timestamp: serverTimestamp(), // This is allowed here (not in array)
+        await logGoalActivity(uid, "created", newGoal.id, {
+          title: newGoal.title,
+          targetAmount: newGoal.targetAmount,
         });
       }
 
-      // Update local state
       setGoals(updatedGoals);
-
-      // Save to Firestore with serverTimestamp at document level
       const goalsDocRef = doc(db, "GoalsTracking", uid);
       await setDoc(
         goalsDocRef,
         {
           goals: updatedGoals,
-          lastUpdated: serverTimestamp(), // Moved to document level
+          lastUpdated: serverTimestamp(),
         },
         { merge: true }
       );
 
-      // Reset form
       resetForm();
     } catch (error) {
       console.error("Error adding/updating goal:", error);
@@ -194,13 +200,17 @@ function GoalsTracking() {
 
   const handleDeleteGoal = async (goalId) => {
     try {
+      const goalToDelete = goals.find((goal) => goal.id === goalId);
       const updatedGoals = goals.filter((goal) => goal.id !== goalId);
       setGoals(updatedGoals);
 
-      // Update Firestore
       const goalsDocRef = doc(db, "GoalsTracking", uid);
       await setDoc(goalsDocRef, { goals: updatedGoals }, { merge: true });
 
+      await logGoalActivity(uid, "deleted", goalId, {
+        title: goalToDelete.title,
+        progress: goalToDelete.progress,
+      });
       toast.success("Goal deleted successfully!");
     } catch (error) {
       console.error("Error deleting goal:", error);
@@ -217,21 +227,17 @@ function GoalsTracking() {
     setFrequencyValue(goal.frequency.value);
     setFrequencyPeriod(goal.frequency.period);
 
-    // Safely handle deadline conversion
     let deadlineValue = "";
     if (goal.deadline) {
       try {
-        // Check if it's a Firestore Timestamp object
         if (goal.deadline.toDate) {
           deadlineValue = goal.deadline.toDate().toISOString().split("T")[0];
         }
-        // Check if it's a seconds/nanoseconds object
         else if (goal.deadline.seconds) {
           deadlineValue = new Date(goal.deadline.seconds * 1000)
             .toISOString()
             .split("T")[0];
         }
-        // Handle case where deadline is already a Date object
         else if (goal.deadline instanceof Date) {
           deadlineValue = goal.deadline.toISOString().split("T")[0];
         }
@@ -247,46 +253,46 @@ function GoalsTracking() {
 
   const updateGoalProgress = async (goalId, newProgress) => {
     try {
-      // Create updated goals array with client-side timestamp
+      const goal = goals.find((g) => g.id === goalId);
+      const completed = newProgress >= goal.targetAmount;
+
       const updatedGoals = goals.map((goal) => {
         if (goal.id === goalId) {
           return {
             ...goal,
             progress: newProgress,
-            completed: newProgress >= goal.targetAmount,
-            lastUpdated: new Date().toISOString(), // Client timestamp instead
+            completed,
+            lastUpdated: new Date().toISOString(),
           };
         }
         return goal;
       });
 
-      // Optimistic UI update
       setGoals(updatedGoals);
 
-      // Update Firestore with document-level serverTimestamp
       const goalsDocRef = doc(db, "GoalsTracking", uid);
       await setDoc(
         goalsDocRef,
         {
           goals: updatedGoals,
-          lastUpdatedServer: serverTimestamp(), // Document-level timestamp
+          lastUpdatedServer: serverTimestamp(),
         },
         { merge: true }
       );
 
-      // Log progress update for analytics
-      await addDoc(collection(db, "GoalLogs"), {
-        userId: uid,
-        action: "progress_update",
-        goalId: goalId,
-        newProgress: newProgress,
-        timestamp: serverTimestamp(),
-      });
+      await logGoalActivity(
+        uid,
+        completed ? "completed" : "progress_update",
+        goalId,
+        {
+          newProgress,
+          targetAmount: goal.targetAmount,
+        }
+      );
 
       toast.success("Progress updated!");
     } catch (error) {
       console.error("Error updating goal progress:", error);
-      // Revert local state if Firestore fails
       setGoals(goals);
       toast.error("Failed to update progress.");
     }
@@ -296,7 +302,12 @@ function GoalsTracking() {
     if (goal.completed) return "Completed";
 
     if (goal.deadline) {
-      const deadlineDate = new Date(goal.deadline.seconds * 1000);
+      const deadlineDate = goal.deadline.toDate 
+        ? goal.deadline.toDate() 
+        : goal.deadline.seconds 
+          ? new Date(goal.deadline.seconds * 1000)
+          : new Date(goal.deadline);
+      
       const currentDate = new Date();
       const daysRemaining = Math.ceil(
         (deadlineDate - currentDate) / (1000 * 60 * 60 * 24)
@@ -341,19 +352,15 @@ function GoalsTracking() {
     if (!deadline) return "No deadline";
 
     try {
-      // Handle Firestore Timestamp object
       if (deadline.toDate) {
         return deadline.toDate().toLocaleDateString();
       }
-      // Handle timestamp with seconds property
       else if (deadline.seconds) {
         return new Date(deadline.seconds * 1000).toLocaleDateString();
       }
-      // Handle JavaScript Date object
       else if (deadline instanceof Date) {
         return deadline.toLocaleDateString();
       }
-      // Handle ISO string
       else if (typeof deadline === "string") {
         return new Date(deadline).toLocaleDateString();
       }
@@ -363,65 +370,6 @@ function GoalsTracking() {
       return "Invalid date";
     }
   };
-
-  // Get user notification permission if not granted
-  const requestNotificationPermission = async () => {
-    if (!"Notification" in window) {
-      toast.error("Your browser doesn't support notifications");
-      return;
-    }
-
-    if (Notification.permission !== "granted") {
-      const permission = await Notification.requestPermission();
-      if (permission === "granted") {
-        toast.success("Notification permission granted!");
-      }
-    }
-  };
-
-  useEffect(() => {
-    // Request notification permission when component mounts
-    if (typeof window !== "undefined" && "Notification" in window) {
-      requestNotificationPermission();
-    }
-
-    // Check for approaching deadlines
-    const checkDeadlines = () => {
-      goals.forEach((goal) => {
-        if (goal.completed) return;
-
-        if (goal.deadline) {
-          const deadlineDate = new Date(goal.deadline.seconds * 1000);
-          const currentDate = new Date();
-          const daysRemaining = Math.ceil(
-            (deadlineDate - currentDate) / (1000 * 60 * 60 * 24)
-          );
-
-          // Notify if deadline is approaching
-          if (daysRemaining <= 2 && daysRemaining > 0) {
-            // Browser notification
-            if (Notification.permission === "granted") {
-              new Notification(`Goal Deadline Approaching`, {
-                body: `${goal.title} deadline is in ${daysRemaining} days!`,
-                icon: "/favicon.ico",
-              });
-            }
-
-            // In-app notification
-            toast.warning(
-              `${goal.title} deadline is in ${daysRemaining} days!`
-            );
-          }
-        }
-      });
-    };
-
-    // Check deadlines once a day
-    const deadlineInterval = setInterval(checkDeadlines, 86400000); // 24 hours
-
-    // Clean up
-    return () => clearInterval(deadlineInterval);
-  }, [goals]);
 
   if (isLoading) {
     return (
@@ -441,16 +389,15 @@ function GoalsTracking() {
 
   return (
     <div className="3xl:px-48 2xl:px-40 xl:px-32 lg:px-20 md:px-12 px-4 py-10">
-      <div className=" font-bold text-3xl sm:text-4xl block sm:flex justify-between items-center">
+      <div className="font-bold text-3xl sm:text-4xl block sm:flex justify-between items-center">
         <span className="block">Goals Tracking</span>
         <button
           onClick={() => setShowForm(!showForm)}
-          className="bg-[#2E8B57] text-white text-sm sm:text-base font-semibold  py-2 px-4 rounded-lg hover:bg-[#1e6b47] transition duration-300">
+          className="bg-[#2E8B57] text-white text-sm sm:text-base font-semibold py-2 px-4 rounded-lg hover:bg-[#1e6b47] transition duration-300">
           {showForm ? "Cancel" : "Add New Goal"}
         </button>
       </div>
 
-      {/* Goal Form */}
       {showForm && (
         <div className="mt-6 p-6 border rounded-md shadow-sm bg-white">
           <h3 className="text-xl font-medium mb-4">
@@ -472,13 +419,13 @@ function GoalsTracking() {
             </div>
 
             <div className="flex flex-col">
-              <label className="mb-1 font-medium">Goal Type</label>
+              <label className="mb-1  font-medium">Goal Type</label>
               <select
                 value={goalType}
                 onChange={(e) => setGoalType(e.target.value)}
-                className="border p-2 rounded">
+                className="border p-2 rounded ">
                 {goalTypes.map((type) => (
-                  <option key={type} value={type}>
+                  <option key={type} value={type} className="capitalize">
                     {type}
                   </option>
                 ))}
@@ -519,7 +466,7 @@ function GoalsTracking() {
                 <select
                   value={frequencyPeriod}
                   onChange={(e) => setFrequencyPeriod(e.target.value)}
-                  className="border p-2 rounded w-2/3">
+                  className="border p-2 rounded ">
                   <option value="day">per day</option>
                   <option value="week">per week</option>
                   <option value="month">per month</option>
@@ -543,7 +490,7 @@ function GoalsTracking() {
               )}
             </div>
 
-            {goalType === "Recipe" && (
+            {/* {goalType === "Recipe" && (
               <div className="flex flex-col">
                 <label className="mb-1 font-medium">Recipe ID (Optional)</label>
                 <input
@@ -554,7 +501,7 @@ function GoalsTracking() {
                   className="border p-2 rounded"
                 />
               </div>
-            )}
+            )} */}
 
             {(userAllergies.length > 0 || userChronicDiseases.length > 0) && (
               <div className="md:col-span-2 p-4 bg-blue-50 rounded-md mt-2">
@@ -599,7 +546,6 @@ function GoalsTracking() {
         </div>
       )}
 
-      {/* Goals Dashboard */}
       <div className="mt-8">
         {goals.length === 0 ? (
           <div className="text-center p-12 bg-gray-50 rounded-lg border border-dashed">
@@ -676,13 +622,7 @@ function GoalsTracking() {
                       </div>
                       <div>
                         <span className="font-medium block">Deadline:</span>
-                        <span>
-                          {goal.deadline
-                            ? new Date(
-                                goal.deadline.seconds * 1000
-                              ).toLocaleDateString()
-                            : "No deadline"}
-                        </span>
+                        <span>{formatDeadline(goal.deadline)}</span>
                       </div>
                       {goal.recipeId && (
                         <div>
@@ -693,7 +633,6 @@ function GoalsTracking() {
                     </div>
                   </div>
 
-                  {/* Actions Footer */}
                   <div className="bg-gray-50 px-4 py-3 flex justify-between items-center border-t">
                     <div className="flex gap-2">
                       <button
@@ -706,7 +645,7 @@ function GoalsTracking() {
                         className="text-red-600 hover:text-red-800 font-bold"
                         disabled={goal.progress <= 0}
                         title="Decrease Progress">
-                      -
+                        -
                       </button>
                       <button
                         onClick={() =>
@@ -738,247 +677,10 @@ function GoalsTracking() {
           </div>
         )}
       </div>
+
+      <GoalLogs uid={uid} />
     </div>
   );
 }
 
 export default GoalsTracking;
-
-// import React, { useState, useEffect } from "react";
-// import {
-//   doc,
-//   setDoc,
-//   getDoc,
-//   collection,
-//   addDoc,
-//   query,
-//   where,
-//   onSnapshot,
-//   deleteDoc,
-// } from "firebase/firestore";
-// import { auth, db } from "../config/firebase"; // Ensure you have initialized Firebase
-// import { onAuthStateChanged } from "firebase/auth";
-// import { toast } from "react-toastify";
-// import "react-toastify/dist/ReactToastify.css";
-// import emailjs from 'emailjs-com'; // For sending email notifications
-
-// const GoalsTracking = () => {
-//   const [goals, setGoals] = useState([]);
-//   const [newGoal, setNewGoal] = useState("");
-//   const [deadline, setDeadline] = useState("");
-//   const [editingGoal, setEditingGoal] = useState(null);
-//   const [uid, setUid] = useState(null);
-
-//   useEffect(() => {
-//     const unsubscribe = onAuthStateChanged(auth, (user) => {
-//       if (user) {
-//         setUid(user.uid);
-//         fetchGoals(user.uid);
-//       } else {
-//         setUid(null);
-//         setGoals([]);
-//       }
-//     });
-//     return () => unsubscribe();
-//   }, []);
-
-//   useEffect(() => {
-//     if (uid) {
-//       const unsubscribe = onSnapshot(
-//         query(collection(db, "Goals"), where("userId", "==", uid)),
-//         (snapshot) => {
-//           const goalsList = snapshot.docs.map((doc) => ({
-//             id: doc.id,
-//             ...doc.data(),
-//           }));
-//           setGoals(goalsList);
-//           checkDeadlines(goalsList);
-//         }
-//       );
-//       return () => unsubscribe();
-//     }
-//   }, [uid]);
-
-//   const fetchGoals = async (userId) => {
-//     try {
-//       const q = query(collection(db, "Goals"), where("userId", "==", userId));
-//       const querySnapshot = await getDocs(q);
-//       const goalsList = querySnapshot.docs.map((doc) => ({
-//         id: doc.id,
-//         ...doc.data(),
-//       }));
-//       setGoals(goalsList);
-//       checkDeadlines(goalsList);
-//     } catch (error) {
-//       console.log(error);
-//       toast.error("An error occurred while fetching your goals.");
-//     }
-//   };
-
-//   const checkDeadlines = (goalsList) => {
-//     const today = new Date();
-//     goalsList.forEach((goal) => {
-//       const deadlineDate = new Date(goal.deadline);
-//       const timeDiff = deadlineDate.getTime() - today.getTime();
-//       const daysDiff = timeDiff / (1000 * 3600 * 24);
-
-//       if (daysDiff <= 1 && !goal.completed) {
-//         sendNotification(goal);
-//       }
-//     });
-//   };
-
-//   const sendNotification = (goal) => {
-//     const templateParams = {
-//       to_email: "siddheshshende02@gmail.com", // Replace with the user's email
-//       goal_name: goal.goal,
-//       deadline: goal.deadline,
-//     };
-
-//     emailjs
-//       .send("YOUR_SERVICE_ID", "YOUR_TEMPLATE_ID", templateParams, "YOUR_USER_ID")
-//       .then(
-//         (response) => {
-//           console.log("SUCCESS!", response.status, response.text);
-//         },
-//         (err) => {
-//           console.log("FAILED...", err);
-//         }
-//       );
-//   };
-
-//   const addGoal = async () => {
-//     if (newGoal.trim() && deadline) {
-//       try {
-//         await addDoc(collection(db, "Goals"), {
-//           goal: newGoal.trim(),
-//           deadline: deadline,
-//           completed: false,
-//           userId: uid,
-//         });
-//         setNewGoal("");
-//         setDeadline("");
-//         toast.success("Goal added successfully!");
-//       } catch (error) {
-//         console.log(error);
-//         toast.error("An error occurred while adding the goal.");
-//       }
-//     } else {
-//       toast.error("Please enter a goal and a deadline.");
-//     }
-//   };
-
-//   const editGoal = (goal) => {
-//     setEditingGoal(goal);
-//     setNewGoal(goal.goal);
-//     setDeadline(goal.deadline);
-//   };
-
-//   const updateGoal = async () => {
-//     if (editingGoal && newGoal.trim() && deadline) {
-//       try {
-//         const goalRef = doc(db, "Goals", editingGoal.id);
-//         await setDoc(
-//           goalRef,
-//           { goal: newGoal.trim(), deadline: deadline },
-//           { merge: true }
-//         );
-//         setNewGoal("");
-//         setDeadline("");
-//         setEditingGoal(null);
-//         toast.success("Goal updated successfully!");
-//       } catch (error) {
-//         console.log(error);
-//         toast.error("An error occurred while updating the goal.");
-//       }
-//     } else {
-//       toast.error("Please enter a goal and a deadline.");
-//     }
-//   };
-
-//   const deleteGoal = async (id) => {
-//     try {
-//       const goalRef = doc(db, "Goals", id);
-//       await deleteDoc(goalRef);
-//       toast.success("Goal deleted successfully!");
-//     } catch (error) {
-//       console.log(error);
-//       toast.error("An error occurred while deleting the goal.");
-//     }
-//   };
-
-//   const markAsCompleted = async (id, completed) => {
-//     try {
-//       const goalRef = doc(db, "Goals", id);
-//       await setDoc(goalRef, { completed: !completed }, { merge: true });
-//       toast.success("Goal status updated successfully!");
-//     } catch (error) {
-//       console.log(error);
-//       toast.error("An error occurred while updating the goal status.");
-//     }
-//   };
-
-//   return (
-//     <div className="mx-auto">
-//       <div className="pt-[5vh] font-semibold text-3xl sm:text-4xl">Goals Tracking</div>
-//       <div className="font-medium flex flex-col gap-2 mt-[5vh] border px-5 rounded-sm py-[5vh] m-4">
-//         <div className="">
-//           <label className="block mb-2">
-//             {editingGoal ? "Edit Goal" : "Add Goal"}
-//           </label>
-//           <input
-//             placeholder="Enter goal"
-//             className="py-1 md:py-2 pl-1.5 md:pl-3 border rounded-lg"
-//             value={newGoal}
-//             onChange={(e) => setNewGoal(e.target.value)}
-//           />
-//           <input
-//             type="date"
-//             className="py-1 md:py-2 pl-1.5 md:pl-3 border rounded-lg mt-2"
-//             value={deadline}
-//             onChange={(e) => setDeadline(e.target.value)}
-//           />
-//           <button
-//             className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mt-2"
-//             onClick={editingGoal ? updateGoal : addGoal}
-//           >
-//             {editingGoal ? "Update Goal" : "Add Goal"}
-//           </button>
-//         </div>
-//         <div className="mt-4">
-//           <ul>
-//             {goals.map((goal) => (
-//               <li key={goal.id} className="text-lg flex items-center justify-between mb-2">
-//                 <span style={{ textDecoration: goal.completed ? "line-through" : "none" }}>
-//                   {goal.goal} (Deadline: {new Date(goal.deadline).toLocaleDateString()})
-//                 </span>
-//                 <div>
-//                   <button
-//                     onClick={() => markAsCompleted(goal.id, goal.completed)}
-//                     className="ml-2 text-green-500 font-bold"
-//                   >
-//                     {goal.completed ? "Mark as Incomplete" : "Mark as Completed"}
-//                   </button>
-//                   <button
-//                     onClick={() => editGoal(goal)}
-//                     className="ml-2 text-blue-500 font-bold"
-//                   >
-//                     Edit
-//                   </button>
-//                   <button
-//                     onClick={() => deleteGoal(goal.id)}
-//                     className="ml-2 text-red-500 font-bold"
-//                   >
-//                     Delete
-//                   </button>
-//                 </div>
-//               </li>
-//             ))}
-//           </ul>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default GoalsTracking;
