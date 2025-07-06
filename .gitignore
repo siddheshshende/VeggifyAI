@@ -2,7 +2,7 @@
 .env
 
 # Ignore Firebase configuration (if it contains sensitive data)
-firebase.js
+# firebase.js
 
 # Ignore node_modules directory
 node_modules/
