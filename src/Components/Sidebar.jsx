@@ -48,7 +48,7 @@ function Sidebar({ logOut, collapsed, setCollapsed }) {
         onClick={() => navigate("/profile")}
         className={`font-semibold ${collapsed ? "text-center text-3xl sm:text-4xl" : "text-5xl"} p-5 text-white cursor-pointer hover:underline truncate`}
       >
-        {collapsed ? "V" : "Veggify"}
+        {collapsed ? "V" : "VeggifyAI"}
       </div>
 
       {/* Tagline */}
