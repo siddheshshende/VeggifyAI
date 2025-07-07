@@ -1,7 +1,5 @@
-# Veggify
-An AI based nutrition companion
-# Nutrify
-# VeggifyAI Project Documentation
+
+# VeggifyAI (An AI based nutrition companion)
 
 ## Introduction
 
