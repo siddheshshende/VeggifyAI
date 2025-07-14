@@ -1,7 +1,7 @@
 <a name="readme-top"></a>
 
 <div align="center">
-<img width="200px" src="client/public/logo.png" alt="VeggifyAI Logo">
+<img width="200px" src="public/veggify-logo.jpg" alt="VeggifyAI Logo">
 </div>
 
 <h1 align="center">VeggifyAI<br/><span style="font-size:10px;">An AI-Powered Nutrition Companion</span></h1>
