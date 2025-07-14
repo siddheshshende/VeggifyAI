@@ -115,7 +115,7 @@ function Login() {
               placeholder={
                 isSignIn
                   ? "Enter your password"
-                  : "Create a password (min 8 characters)"
+                  : "Create a password (min 6 characters)"
               }
               value={password}
               onChange={(e) => setPassword(e.target.value)}
