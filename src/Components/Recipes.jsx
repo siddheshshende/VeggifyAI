@@ -32,13 +32,13 @@ function Recipes() {
     eventSourceRef.current.onmessage = (event) => {
       if (event.data === '[And its done]') {
         const completeContent = chunks.join("");
-        console.log("Complete Recipe:", completeContent);
+        // console.log("Complete Recipe:", completeContent);
         setRecipeText(completeContent);
         closeEventStream();
         return;
       }
 
-      console.log("Received chunk:", event.data);
+      // console.log("Received chunk:", event.data);
       chunks.push(event.data);
 
       try {

@@ -17,7 +17,7 @@ const RecipeCard = ({ onSubmit, userId }) => {
       userId,
     };
     onSubmit(recipeData);
-    console.log("Recipe data submitted: ", recipeData);
+    // console.log("Recipe data submitted: ", recipeData);
   };
 
   return (

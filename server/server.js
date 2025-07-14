@@ -37,10 +37,10 @@ async function fetchDocument(userId) {
     const userDocRef = doc(db, "Demographics", userId);
     const userDoc = await getDoc(userDocRef);
     if (userDoc.exists()) {
-      console.log(` User document found for ID: ${userId}`);
+      // console.log(` User document found for ID: ${userId}`);
       return userDoc.data();
     } else {
-      console.log(` No user document found for ID: ${userId}`);
+      // console.log(` No user document found for ID: ${userId}`);
       return {};
     }
   } catch (error) {
@@ -57,7 +57,7 @@ const saveRecipeToFirebase = async (userId, recipeContent) => {
       content: recipeContent,
       createdAt: new Date(),
     });
-    console.log("Recipe saved with ID:", docRef.id);
+    // console.log("Recipe saved with ID:", docRef.id);
     return docRef.id; // ✅ Return recipe ID for bookmarking
   } catch (error) {
     console.error("Error saving recipe:", error);
@@ -89,13 +89,13 @@ app.get("/recipestream", async (req, res) => {
     res.status(400).send(" Missing required query parameters");
     return;
   }
-  console.log(" Parameters validated:", {
-    ingredients,
-    mealType,
-    cuisine,
-    cookingTime,
-    complexity,
-  });
+  // console.log(" Parameters validated:", {
+  //   ingredients,
+  //   mealType,
+  //   cuisine,
+  //   cookingTime,
+  //   complexity,
+  // });
 
   try {
     const isValidAPI = await validateOpenAI();
