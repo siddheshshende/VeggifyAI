@@ -152,7 +152,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Feature 1 */}
             <div
-              className={`bg-white p-6 text-center rounded-xl shadow-lg  transition-all duration-300 transform hover:scale-105   ${
+              className={`bg-white p-6 text-center rounded-xl shadow-lg  transition-all ease-in-out duration-150 transform hover:scale-105   ${
                 showFeatures
                   ? "translate-y-0 opacity-100"
                   : "translate-y-10 opacity-0"
@@ -172,12 +172,12 @@ const Home = () => {
 
             {/* Feature 2 */}
             <div
-              className={`bg-white p-6 rounded-xl text-center shadow-lg transition-all duration-300 transform hover:scale-105 ${
+              className={`bg-white p-6 rounded-xl text-center shadow-lg transition-all ease-in-out duration-150 transform hover:scale-105 ${
                 showFeatures
                   ? "translate-y-0 opacity-100"
                   : "translate-y-10 opacity-0"
               }`}
-              style={{ transitionDelay: "200ms" }}>
+              style={{ transitionDelay: "150ms" }}>
               <div className="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mb-6 mx-auto">
                 <Target size={28} className="text-[#2E8B57]" />
               </div>

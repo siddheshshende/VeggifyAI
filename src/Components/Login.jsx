@@ -1,10 +1,3 @@
-/*remove all and simply add this email and password validations  
- const validateEmail = (email: string) => {     
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;     return emailRegex.test(email);   
-  };  password must be Minimum 8 characters including uppercase, lowercase, and number  
-  show simple error message like this                    
-  {errors.email && (                                {errors.email}                   email: !formData.get("email")         ? "Please complete this required field."         : !validateEmail(formData.get("email") as string)           ? "Please enter a valid email address"           : "",      keep remaining code as it is
- */
 
 import React, { useState, useEffect } from "react";
 import { auth, googleProvider } from "../config/firebase";
