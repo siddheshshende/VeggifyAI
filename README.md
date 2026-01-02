@@ -58,6 +58,21 @@ VeggifyAI revolutionizes dietary management through AI-powered personalized nutr
 - Smart shopping list automation
 - Secure health profile management
 
+## Project Screenshots
+
+<div align="center">
+  
+<img src="screenshots/1-home.jpg" alt="Home Page" width="200"/>
+<img src="screenshots/2-dashboard.jpg" alt="Dashboard" width="200"/>
+<img src="screenshots/3-generator.jpg" alt="Recipe Generator" width="200"/>
+<img src="screenshots/4-recipe.jpg" alt="Recipe Details" width="200"/>
+
+<img src="screenshots/5-tracking.jpg" alt="Nutrition Tracking" width="200"/>
+<img src="screenshots/6-shopping.jpg" alt="Shopping List" width="200"/>
+<img src="screenshots/7-mobile.jpg" alt="Mobile View" width="200"/>
+<img src="screenshots/8-profile.jpg" alt="User Profile" width="200"/>
+
+</div>
 
 ## Key Features
 
