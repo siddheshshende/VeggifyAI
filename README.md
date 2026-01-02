@@ -62,15 +62,15 @@ VeggifyAI revolutionizes dietary management through AI-powered personalized nutr
 
 <div align="center">
   
-<img src="screenshots/1-home.jpg" alt="Home Page" width="200"/>
-<img src="screenshots/2-dashboard.jpg" alt="Dashboard" width="200"/>
-<img src="screenshots/3-generator.jpg" alt="Recipe Generator" width="200"/>
-<img src="screenshots/4-recipe.jpg" alt="Recipe Details" width="200"/>
+<img src="public/1.png" alt="Home Page" width="200"/>
+<img src="public/2.png" alt="Dashboard" width="200"/>
+<img src="public/3.png" alt="Recipe Generator" width="200"/>
+<img src="public/4.png" alt="Recipe Details" width="200"/>
 
-<img src="screenshots/5-tracking.jpg" alt="Nutrition Tracking" width="200"/>
-<img src="screenshots/6-shopping.jpg" alt="Shopping List" width="200"/>
-<img src="screenshots/7-mobile.jpg" alt="Mobile View" width="200"/>
-<img src="screenshots/8-profile.jpg" alt="User Profile" width="200"/>
+<img src="public/5.png" alt="Nutrition Tracking" width="200"/>
+<img src="public/6.png" alt="Shopping List" width="200"/>
+<img src="public/7.png" alt="Mobile View" width="200"/>
+<img src="public/8.png" alt="User Profile" width="200"/>
 
 </div>
 
