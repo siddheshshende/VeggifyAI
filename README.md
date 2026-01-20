@@ -111,11 +111,23 @@ VeggifyAI revolutionizes dietary management through AI-powered personalized nutr
 - OpenAI API key
 
 ### Setup Instructions
-1. Clone the repository:
+1. Clone the repository and navigate to folder and then install dependencies:
    ```bash
    git clone https://github.com/yourrepo/veggifyai.git
-   cd veggifyai
-
+   cd veggifyai or cd VeggifyAI
+   npm install
+   ```
+   
+2. Navigate to backend (server folder)
+   ```bash
+   cd server
+   npm run start
+   ```
+   
+3. Then,Start the frontend
+   ```bash
+   npm run dev
+   ```
    
 ## Core Functionality
 
