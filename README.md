@@ -111,6 +111,11 @@ VeggifyAI revolutionizes dietary management through AI-powered personalized nutr
 - OpenAI API key
 
 ### Setup Instructions
+   Create a .env file
+   ```bash
+   REACT_APP_API_KEY=your_key_here
+   OPENAI_API_KEY=your_key_here
+   ```
 1. Clone the repository and navigate to folder and then install dependencies:
    ```bash
    git clone https://github.com/yourrepo/veggifyai.git
@@ -128,6 +133,7 @@ VeggifyAI revolutionizes dietary management through AI-powered personalized nutr
    ```bash
    npm run dev
    ```
+   
    
 ## Core Functionality
 
